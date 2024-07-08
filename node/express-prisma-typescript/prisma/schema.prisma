@@ -34,7 +34,7 @@ model User {
 }
 
 model Follow {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
+  // Primary Key
 
   followerId String @db.Uuid()
   followedId String @db.Uuid()
@@ -45,6 +45,9 @@ model Follow {
 
   follower User @relation(name: "follows", fields: [followerId], references: [id], onDelete: Cascade) // One to many
   followed User @relation(name: "followers", fields: [followedId], references: [id], onDelete: Cascade) // One to many
+
+  @@id([followerId, followedId])
+  @@unique([followerId, followedId])
 }
 
 model Post {

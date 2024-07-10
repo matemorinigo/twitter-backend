@@ -18,8 +18,6 @@ export class FollowRepositoryImpl implements FollowRepository {
   }
 
   async unfollow (followerId: string, followedId: string): Promise<FollowDTO> {
-    // se solucionaria armando una clave unica followedID y followerID
-
     const follow = await this.db.follow.delete({
       where: {
         followerId_followedId: {
@@ -31,16 +29,6 @@ export class FollowRepositoryImpl implements FollowRepository {
     return new FollowDTO(follow)
   }
 
-  async getFollowId (followerId: string, followedId: string): Promise<string> {
-    const follow = await this.db.follow.findFirst({
-      where: {
-        followerId,
-        followedId
-      }
-    })
-
-    if (follow) { return follow.id } else { throw new NotFoundException() }
-  }
 
   async getFollowers (followingId: string): Promise<FollowDTO[]> {
     const followers = await this.db.follow.findMany({
@@ -60,5 +48,17 @@ export class FollowRepositoryImpl implements FollowRepository {
     })
 
     return follows.map(follow => new FollowDTO(follow))
+  }
+
+  async isFollowing (followerId: string, followedId: string): Promise<boolean> {
+    // Opcion 1, service se fija si isFollowing para que no pueda seguirlo si ya lo sigue.
+    // Opcion 2, se valida directo en el repository del follow
+    const follow = await this.db.follow.findFirst({
+      where: {
+        followerId,
+        followedId
+      }
+    })
+    return !!follow
   }
 }

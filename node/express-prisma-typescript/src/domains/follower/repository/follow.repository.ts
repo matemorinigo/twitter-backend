@@ -5,5 +5,5 @@ export interface FollowRepository {
   unfollow: (followerId: string, followedId: string) => Promise<FollowDTO>
   getFollowers: (followingId: string) => Promise<FollowDTO[]>
   getFollowing: (followerId: string) => Promise<FollowDTO[]>
-  getFollowId: (followerId: string, followedId: string) => Promise<string>
+  isFollowing: (followerId: string, followedId: string) => Promise<boolean>
 }

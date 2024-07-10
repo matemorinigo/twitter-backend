@@ -8,11 +8,17 @@ import { db, BodyValidation } from '@utils'
 import { PostRepositoryImpl } from '../repository'
 import { PostService, PostServiceImpl } from '../service'
 import { CreatePostInputDTO } from '../dto'
+import { FollowServiceImpl } from '@domains/follower/service/follow.service.impl';
+import { FollowRepositoryImpl } from '@domains/follower/repository/follow.repository.impl';
+import { UserServiceImpl } from '@domains/user/service';
+import { UserRepositoryImpl } from '@domains/user/repository';
 
 export const postRouter = Router()
 
 // Use dependency injection
-const service: PostService = new PostServiceImpl(new PostRepositoryImpl(db))
+const service: PostService = new PostServiceImpl(new PostRepositoryImpl(db),
+  new FollowServiceImpl(new FollowRepositoryImpl(db), new UserServiceImpl(new UserRepositoryImpl(db))),
+  new UserServiceImpl(new UserRepositoryImpl(db)))
 
 postRouter.get('/', async (req: Request, res: Response) => {
   const { userId } = res.locals.context

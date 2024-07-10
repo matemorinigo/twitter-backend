@@ -1,6 +1,6 @@
 import { NotFoundException } from '@utils/errors'
 import { OffsetPagination } from 'types'
-import { UserDTO } from '../dto'
+import { UpdateUserDTO, UserDTO } from '../dto';
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'
 
@@ -11,6 +11,10 @@ export class UserServiceImpl implements UserService {
     const user = await this.repository.getById(userId)
     if (!user) throw new NotFoundException('user')
     return user
+  }
+
+  async updateUser (userId: string, data: UpdateUserDTO): Promise<UpdateUserDTO> {
+    return await this.repository.updateUser(userId, data)
   }
 
   async getUserRecommendations (userId: any, options: OffsetPagination): Promise<UserDTO[]> {

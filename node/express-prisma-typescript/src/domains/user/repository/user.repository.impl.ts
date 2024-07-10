@@ -1,7 +1,7 @@
 import { SignupInputDTO } from '@domains/auth/dto'
 import { PrismaClient } from '@prisma/client'
 import { OffsetPagination } from '@types'
-import { ExtendedUserDTO, UserDTO } from '../dto'
+import { ExtendedUserDTO, UpdateUserDTO, UserDTO } from '../dto';
 import { UserRepository } from './user.repository'
 
 export class UserRepositoryImpl implements UserRepository {
@@ -20,6 +20,16 @@ export class UserRepositoryImpl implements UserRepository {
       }
     })
     return user ? new UserDTO(user) : null
+  }
+
+  async updateUser (userId: string, data: UpdateUserDTO): Promise<UpdateUserDTO> {
+    const updatedUser = await this.db.user.update({
+      where: {
+        id: userId
+      },
+      data
+    })
+    return new UpdateUserDTO(updatedUser)
   }
 
   async delete (userId: any): Promise<void> {

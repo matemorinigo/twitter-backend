@@ -51,5 +51,6 @@ export function ErrorHandling (error: Error, req: Request, res: Response, next: 
     return res.status(error.code).json({ message: error.message, code: error.code, errors: error.error })
   }
   Logger.error(error.message)
+  console.log(error)
   return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: error.message, code: 500 })
 }

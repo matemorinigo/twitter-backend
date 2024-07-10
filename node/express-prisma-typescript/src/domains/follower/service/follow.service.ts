@@ -5,4 +5,5 @@ export interface FollowService {
   unfollow: (followerId: string, followedId: string) => Promise<FollowDTO>
   getFollowers: (followingId: string) => Promise<FollowDTO[]>
   getFollowing: (followerId: string) => Promise<FollowDTO[]>
+  isFollowing: (followerId: string, followedId: string) => Promise<boolean>
 }

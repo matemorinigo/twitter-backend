@@ -29,18 +29,26 @@ const service: FollowService = new FollowServiceImpl(new FollowRepositoryImpl(db
  *           format: uuid
  *     responses:
  *       200:
- *         description: User registered and logged successfully
+ *         description: User followed successfully
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 token:
+ *                 id:
  *                   type: string
+ *                   format: uuid
+ *                 followerId:
+ *                   type: string
+ *                   format: uuid
+ *                 followedId:
+ *                   type: string
+ *                   format: uuid
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
  *       409:
- *         description: User already exists
- *       400:
- *         description: Validation error
+ *         description: Cannot follow yourself or user already followed
  *         content:
  *           application/json:
  *             schema:
@@ -48,21 +56,29 @@ const service: FollowService = new FollowServiceImpl(new FollowRepositoryImpl(db
  *               properties:
  *                 message:
  *                   type: string
+ *                   default: Conflict
  *                 code:
  *                   type: number
- *                   default: 400
+ *                   default: 409
  *                 errors:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       property:
- *                         type: string
- *                       children:
- *                         type: array
- *                       constraints:
- *                         type: object
- *
+ *                   type: object
+ *                   properties:
+ *                     error_code:
+ *                       type: string
+ *                       enum: [CANNOT_FOLLOW_YOURSELF, USER_ALREADY_FOLLOWED]
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   default: Not found
+ *                 code:
+ *                   type: number
+ *                   default: 404
  */
 
 followRouter.post('/follow/:id', async (req: Request, res: Response) => {

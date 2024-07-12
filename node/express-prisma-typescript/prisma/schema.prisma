@@ -32,6 +32,8 @@ model User {
   follows   Follow[] @relation(name: "follows")
   followers Follow[] @relation(name: "followers")
 
+  reactions Reaction[]
+
   publicAccount Boolean @default(true)
 }
 
@@ -63,5 +65,38 @@ model Post {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Optional value
 
+  isComment Boolean @default(false)
+
+  postId   String? @db.Uuid
+  post     Post?   @relation("PostComments", fields: [postId], references: [id])
+  comments Post[]  @relation("PostComments")
+
+  reactions Reaction[]
+
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to many
+}
+
+// A post can have zero or more reactions
+// An user can have zero or more reactions
+// But a reaction must always can have an user and a post
+
+// I use a composite key because a reaction cant repeat the combination (user, post, type)
+// For example: if you already have (Mateo, Post1, LIKE) you cant have another (Mateo, Post1, LIKE)
+// But you can have (Mateo, Post1, RETWEET)
+model Reaction {
+  postId String @db.Uuid
+
+  type ReactionType
+
+  post   Post   @relation(fields: [postId], references: [id]) // One post have many reactions
+  User   User   @relation(fields: [userId], references: [id])
+  userId String @db.Uuid
+
+  @@id([postId, userId, type])
+  @@unique([postId, userId, type])
+}
+
+enum ReactionType {
+  LIKE
+  RETWEET
 }

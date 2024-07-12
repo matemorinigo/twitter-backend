@@ -2,15 +2,15 @@ import { CreatePostInputDTO, PostDTO } from '../dto'
 import { PostRepository } from '../repository'
 import { PostService } from '.'
 import { validate } from 'class-validator'
-import { ForbiddenException, NotFoundException } from '@utils'
+import { ForbiddenException, NotFoundException, ValidatePostVisibility } from '@utils'
 import { CursorPagination } from '@types'
-import { UserDTO } from '@domains/user/dto';
-import { FollowRepository } from '@domains/follower/repository/follow.repository';
-import { UserRepository } from '@domains/user/repository';
+import { UserDTO } from '@domains/user/dto'
+import { FollowRepository } from '@domains/follower/repository/follow.repository'
+import { UserRepository } from '@domains/user/repository'
 
 export class PostServiceImpl implements PostService {
   constructor (private readonly repository: PostRepository, private readonly followRepository: FollowRepository,
-    private readonly userRepository: UserRepository) {}
+    private readonly userRepository: UserRepository, private readonly validatePostVisibility: ValidatePostVisibility) {}
 
   async createPost (userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
     await validate(data)
@@ -26,8 +26,7 @@ export class PostServiceImpl implements PostService {
 
   async getPost (userId: string, postId: string): Promise<PostDTO> {
     // TODO: validate that the author has public profile or the user follows the author
-    const author = await this.getPostAuthor(postId)
-    if (!author.publicAccount && !await this.followRepository.isFollowing(userId, author.id) && author.id !== userId) { throw new NotFoundException() }
+    if (!(await this.validatePostVisibility.validateUserCanSeePost(userId, postId))) { throw new NotFoundException() }
     const post = await this.repository.getById(postId)
     if (!post) throw new NotFoundException('post')
     return post
@@ -39,10 +38,7 @@ export class PostServiceImpl implements PostService {
     const filteredPosts: PostDTO[] = []
 
     for (const post of posts) {
-      const author = await this.getPostAuthor(post.id)
-
-      // queda una linea larguisima por el eslint, a mi no me gusta
-      if (author.publicAccount || await this.followRepository.isFollowing(userId, author.id) || userId === author.id) { filteredPosts.push(post) }
+      if (await this.validatePostVisibility.validateUserCanSeePosts(userId, post.authorId)) { filteredPosts.push(post) }
     }
 
     return filteredPosts
@@ -50,11 +46,8 @@ export class PostServiceImpl implements PostService {
 
   async getPostsByAuthor (userId: any, authorId: string): Promise<PostDTO[]> {
     // TODO: throw exception when the author has a private profile and the user doesn't follow them
-    const author = await this.userRepository.getById(authorId)
 
-    if (!author) { throw new NotFoundException() }
-
-    if (!author.publicAccount && !await this.followRepository.isFollowing(userId, authorId) && userId !== authorId) { throw new NotFoundException() }
+    if (!await this.validatePostVisibility.validateUserCanSeePosts(userId, authorId)) { throw new NotFoundException() }
 
     return await this.repository.getByAuthorId(authorId)
   }
@@ -71,4 +64,10 @@ export class PostServiceImpl implements PostService {
 
     return user
   }
+
+  // I need to use it on lots of services (at least 2),
+  /*
+  private async userCanSeePosts (userId: string, author: UserDTO): Promise<boolean> {
+    return author.publicAccount || !await this.followRepository.isFollowing(userId, author.id) || author.id === userId
+  } */
 }

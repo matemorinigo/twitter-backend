@@ -22,7 +22,7 @@ export class CommentDTO {
   }
 
   id: string
-  postId: string
+  postId: string | null
   authorId: string
   content: string
   images: string[]

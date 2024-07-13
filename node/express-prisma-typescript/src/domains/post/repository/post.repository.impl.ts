@@ -49,6 +49,7 @@ export class PostRepositoryImpl implements PostRepository {
         id: postId
       }
     })
+    console.log(post)
     return (post != null) ? new PostDTO(post) : null
   }
 

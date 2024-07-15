@@ -41,6 +41,22 @@ reactionRouter.get('/retweets/:postId', BodyValidation(ReactBodyDTO), async (req
   res.status(HttpStatus.OK).json({ reactions })
 })
 
+reactionRouter.get('/likes/:userId', BodyValidation(ReactBodyDTO), async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+
+  const reactions = await service.likesByUser(req.params.userId, userId)
+
+  res.status(HttpStatus.OK).json({ reactions })
+})
+
+reactionRouter.get('/retweets/:userId', BodyValidation(ReactBodyDTO), async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+
+  const reactions = await service.retweetsByUser(req.params.userId, userId)
+
+  res.status(HttpStatus.OK).json({ reactions })
+})
+
 reactionRouter.delete('/:postId', BodyValidation(ReactBodyDTO), async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 

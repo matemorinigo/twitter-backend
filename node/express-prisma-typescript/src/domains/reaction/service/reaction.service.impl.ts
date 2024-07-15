@@ -30,10 +30,10 @@ export class ReactionServiceImpl implements ReactionService {
   }
 
   async likesByUser (authorId: string, userId: string): Promise<ReactPostDTO[]> {
-    return await this.repository.likesByPost(userId)
+    return await this.repository.likesByPost(authorId)
   }
 
   async retweetsByUser (authorId: string, userId: string): Promise<ReactPostDTO[]> {
-    return await this.repository.retweetsByPost(userId)
+    return await this.repository.retweetsByPost(authorId)
   }
 }

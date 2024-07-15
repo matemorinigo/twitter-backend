@@ -8,11 +8,15 @@ import { BodyValidation, db } from '@utils';
 import { UserRepositoryImpl } from '../repository'
 import { UserService, UserServiceImpl } from '../service'
 import { UpdateUserDTO } from '@domains/user/dto';
+import multer from 'multer'
 
 export const userRouter = Router()
 
 // Use dependency injection
 const service: UserService = new UserServiceImpl(new UserRepositoryImpl(db))
+
+const storage = multer.memoryStorage()
+const upload = multer({ storage })
 
 userRouter.get('/', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
@@ -31,10 +35,10 @@ userRouter.get('/me', async (req: Request, res: Response) => {
   return res.status(HttpStatus.OK).json(user)
 })
 
-userRouter.post('/me', BodyValidation(UpdateUserDTO), async (req: Request, res: Response) => {
+userRouter.post('/me', upload.single('file'), BodyValidation(UpdateUserDTO), async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
-  const updatedUser = await service.updateUser(userId, req.body)
+  const updatedUser = await service.updateUser(userId, req.body, req.file)
 
   return res.status(HttpStatus.OK).json(updatedUser)
 })

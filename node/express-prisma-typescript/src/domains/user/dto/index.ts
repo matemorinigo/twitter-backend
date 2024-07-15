@@ -53,12 +53,15 @@ export class UpdateUserDTO {
   @IsOptional()
     publicAccount?: boolean
 
+  @IsOptional()
+    data?: string
 
-  //no se que tan legal es el Partial pero sin eso se rompe cuando lee user.name
+  // no se que tan legal es el Partial pero sin eso se rompe cuando lee user.name
   constructor (user?: Partial<UpdateUserDTO>) {
     this.name = user?.name
     this.username = user?.username
     this.email = user?.email
     this.publicAccount = user?.publicAccount
+    this.data = user?.data
   }
 }

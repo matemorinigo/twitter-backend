@@ -22,7 +22,7 @@ commentRouter.get('/:postId', async (req: Request, res: Response) => {
   res.status(HttpStatus.OK).json({ comment })
 })
 
-commentRouter.post('/:postId/comment', BodyValidation(CreateCommentInputDTO), async (req: Request, res: Response)=> {
+commentRouter.post('/:postId', BodyValidation(CreateCommentInputDTO), async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
   const comment = await service.comment(req.params.postId, userId, req.body)

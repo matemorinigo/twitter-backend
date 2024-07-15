@@ -105,7 +105,7 @@ followRouter.get('/following', async (req: Request, res: Response) =>{
   res.status(HttpStatus.OK).json({ following })
 })
 
-followRouter.get('/followers', async (req: Request, res: Response) =>{
+followRouter.get('/followers', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
   const following = await service.getFollowers(userId)

@@ -9,7 +9,7 @@ import { PostRepository } from '@domains/post/repository'
 
 export function BodyValidation<T> (target: ClassType<T>) {
   return async (req: Request, res: Response, next: NextFunction) => {
-    req.body = plainToInstance(target, req.body)
+    req.body = req.body.data ? plainToInstance(target, JSON.parse(req.body.data)) : plainToInstance(target, req.body)
     const errors = await validate(req.body, {
       whitelist: true,
       skipMissingProperties: true,

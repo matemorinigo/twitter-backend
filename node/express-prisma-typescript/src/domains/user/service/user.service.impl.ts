@@ -1,8 +1,13 @@
 import { NotFoundException } from '@utils/errors'
 import { OffsetPagination } from 'types'
-import { UpdateUserDTO, UserDTO } from '../dto';
+import { UpdateUserDTO, UserDTO } from '../dto'
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'
+import 'dotenvrc'
+import s3 from '@utils/s3'
+import { PutObjectCommand } from '@aws-sdk/client-s3'
+import * as process from 'process'
+import sharp from 'sharp'
 
 export class UserServiceImpl implements UserService {
   constructor (private readonly repository: UserRepository) {}
@@ -13,7 +18,22 @@ export class UserServiceImpl implements UserService {
     return user
   }
 
-  async updateUser (userId: string, data: UpdateUserDTO): Promise<UpdateUserDTO> {
+  async updateUser (userId: string, data: UpdateUserDTO, file?: Express.Multer.File | undefined): Promise<UpdateUserDTO> {
+    let buffer: Buffer | undefined = undefined
+    if (file) {
+      buffer = await sharp(file.buffer).resize({ width: 368, height: 368, fit: 'contain' }).toBuffer()
+
+      const params = {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: userId,
+        Body: buffer,
+        ContentType: file?.mimetype
+      }
+      const command = new PutObjectCommand(params)
+
+      await s3.send(command)
+    }
+
     return await this.repository.updateUser(userId, data)
   }
 

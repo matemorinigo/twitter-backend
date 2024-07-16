@@ -1,9 +1,11 @@
 import { OffsetPagination } from '@types'
-import { UpdateUserDTO, UserDTO } from '../dto'
+import { UpdateUserDTO, UserDTO, UserViewDTO } from '../dto'
 
 export interface UserService {
   deleteUser: (userId: any) => Promise<void>
-  getUser: (userId: any) => Promise<UserDTO>
-  updateUser: (userId: string, data: UpdateUserDTO, file: Express.Multer.File | undefined) => Promise<UpdateUserDTO>
-  getUserRecommendations: (userId: any, options: OffsetPagination) => Promise<UserDTO[]>
+  getUser: (userId: any) => Promise<UserViewDTO>
+  updateUser: (userId: string, data: UpdateUserDTO) => Promise<UpdateUserDTO>
+  getUserRecommendations: (userId: any, options: OffsetPagination) => Promise<UserViewDTO[]>
+  getProfilePicture: (userId: string) => Promise<string | null>
+  uploadProfilePicture: (userId: string) => Promise<string>
 }

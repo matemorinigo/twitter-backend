@@ -1,4 +1,4 @@
-import { IsOptional } from 'class-validator';
+import { IsOptional } from 'class-validator'
 
 export class UserDTO {
   constructor (user: UserDTO) {
@@ -9,7 +9,7 @@ export class UserDTO {
   }
 
   id: string
-  name: string | null
+  name: string
   createdAt: Date
   publicAccount: boolean
 }
@@ -42,7 +42,7 @@ export class UserViewDTO {
 
 export class UpdateUserDTO {
   @IsOptional()
-    name?: string | null
+    name?: string
 
   @IsOptional()
     username?: string
@@ -54,7 +54,7 @@ export class UpdateUserDTO {
     publicAccount?: boolean
 
   @IsOptional()
-    data?: string
+    profilePictureKey?: string | null
 
   // no se que tan legal es el Partial pero sin eso se rompe cuando lee user.name
   constructor (user?: Partial<UpdateUserDTO>) {
@@ -62,6 +62,6 @@ export class UpdateUserDTO {
     this.username = user?.username
     this.email = user?.email
     this.publicAccount = user?.publicAccount
-    this.data = user?.data
+    this.profilePictureKey = user?.profilePictureKey
   }
 }

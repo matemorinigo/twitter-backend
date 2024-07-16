@@ -19,14 +19,17 @@ datasource db {
 model User {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
 
-  username String  @unique // Unique constraint
-  name     String? @db.VarChar(35) // Limit display name to 35 characters
-  email    String  @unique // Unique constraint
+  username String @unique // Unique constraint
+  name     String @default("user") @db.VarChar(35) // Limit display name to 35 characters
+  email    String @unique // Unique constraint
   password String
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Optional value
+
+  // Here I would put a default key for the new users, to assign a default profile picture
+  profilePictureKey String?
 
   posts     Post[]
   follows   Follow[] @relation(name: "follows")
@@ -89,7 +92,7 @@ model Reaction {
   type ReactionType
 
   post   Post   @relation(fields: [postId], references: [id]) // One post have many reactions
-  User   User   @relation(fields: [userId], references: [id])
+  User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @db.Uuid
 
   @@id([postId, userId, type])

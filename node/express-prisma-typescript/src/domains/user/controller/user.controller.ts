@@ -64,7 +64,7 @@ userRouter.get('/:userId', async (req: Request, res: Response) => {
   return res.status(HttpStatus.OK).json({ user })
 })
 
-userRouter.get('by_username/:username', async (req: Request, res: Response) => {
+userRouter.get('/by_username/:username', async (req: Request, res: Response) => {
   const username = req.params.username
 
   const { limit, skip } = req.query as Record<string, string>

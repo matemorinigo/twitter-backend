@@ -31,18 +31,18 @@ export class UserServiceImpl implements UserService {
     if (userFollows.length > 0) {
       const recommendedUsers: ExtendedUserDTO[] = []
       for (const user of allRecommendedUsers) {
-        if (await this.isFollowedByAFollow(user.id, userFollows) && user.id !== userId) { recommendedUsers.push(user) }
+        if ((await this.isFollowedByAFollow(user.id, userFollows) || user.publicAccount) && user.id !== userId) { recommendedUsers.push(user) }
       }
       allRecommendedUsers = recommendedUsers
     }
 
-    allRecommendedUsers = allRecommendedUsers.filter(user => user.id !== userId)
+    allRecommendedUsers = allRecommendedUsers.filter(user => user.id !== userId && user.publicAccount)
 
     return await Promise.all(allRecommendedUsers.map(async user => (new UserViewDTO({
       id: user.id,
       name: user.name,
       username: user.username,
-      profilePicture: await this.getProfilePicture(userId)
+      profilePicture: await this.getProfilePicture(user.id)
     }))))
   }
 

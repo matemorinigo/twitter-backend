@@ -7,7 +7,7 @@ import { db, BodyValidation, ValidatePostVisibility } from '@utils'
 
 import { PostRepositoryImpl } from '../repository'
 import { PostService, PostServiceImpl } from '../service'
-import { CreatePostInputDTO } from '../dto'
+import { AddMediaInputDTO, CreatePostInputDTO } from '../dto';
 import { FollowRepositoryImpl } from '@domains/follower/repository/follow.repository.impl'
 import { UserRepositoryImpl } from '@domains/user/repository'
 
@@ -54,6 +54,14 @@ postRouter.post('/', BodyValidation(CreatePostInputDTO), async (req: Request, re
   const post = await service.createPost(userId, data)
 
   return res.status(HttpStatus.CREATED).json(post)
+})
+
+postRouter.post('/add_media', BodyValidation(AddMediaInputDTO), async (req: Request, res: Response) => {
+  const data = req.body
+
+  const urls = await service.getUploadMediaPresignedUrl(data)
+
+  return res.status(HttpStatus.CREATED).json({ urls })
 })
 
 postRouter.delete('/:postId', async (req: Request, res: Response) => {

@@ -80,7 +80,6 @@ export class UserRepositoryImpl implements UserRepository {
         id: userId
       }
     })
-
-    return !!user?.profilePictureKey
+    return (Boolean((user?.profilePictureKey)))
   }
 }

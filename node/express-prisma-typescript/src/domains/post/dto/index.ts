@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
-import { ExtendedUserDTO } from '@domains/user/dto'
+import { ArrayMaxSize, IsIn, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { ExtendedUserDTO, UserViewDTO } from '@domains/user/dto';
 
 export class CreatePostInputDTO {
   @IsString()
@@ -8,8 +8,15 @@ export class CreatePostInputDTO {
     content!: string
 
   @IsOptional()
-  @MaxLength(4)
+  @ArrayMaxSize(4)
     images?: string[]
+}
+
+export class AddMediaInputDTO {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(5)
+    fileType!: string
 }
 
 export class PostDTO {
@@ -37,7 +44,7 @@ export class ExtendedPostDTO extends PostDTO {
     this.qtyRetweets = post.qtyRetweets
   }
 
-  author!: ExtendedUserDTO
+  author!: UserViewDTO
   qtyComments!: number
   qtyLikes!: number
   qtyRetweets!: number

@@ -1,7 +1,7 @@
 import { SignupInputDTO } from '@domains/auth/dto'
 import { PrismaClient } from '@prisma/client'
 import { OffsetPagination } from '@types'
-import { ExtendedUserDTO, UpdateUserDTO, UserDTO } from '../dto'
+import { ExtendedUserDTO, UpdateUserDTO, UserDTO, UserViewDTO } from '../dto';
 import { UserRepository } from './user.repository'
 import { adjectives, colors, starWars, uniqueNamesGenerator } from 'unique-names-generator'
 import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
@@ -28,6 +28,19 @@ export class UserRepositoryImpl implements UserRepository {
       }
     })
     return user ? new ExtendedUserDTO(user) : null
+  }
+
+  async getUsersByUsername (username: string, options: OffsetPagination): Promise<UserViewDTO[]> {
+    const users = await this.db.user.findMany({
+      skip: options.skip ? options.skip : undefined,
+      take: options.limit ? options.skip : undefined,
+      where: {
+        username: {
+          contains: username
+        }
+      }
+    })
+    return await Promise.all(users.map(async user => await this.userToUserViewDTO(user)))
   }
 
   async updateUser (userId: string, data: UpdateUserDTO): Promise<UpdateUserDTO> {
@@ -108,5 +121,14 @@ export class UserRepositoryImpl implements UserRepository {
       }
     })
     return (Boolean((user?.profilePictureKey)))
+  }
+
+  private async userToUserViewDTO (user: ExtendedUserDTO): Promise<UserViewDTO> {
+    return new UserViewDTO({
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      profilePicture: await this.getProfilePicture(user.id)
+    })
   }
 }

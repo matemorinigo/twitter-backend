@@ -1,6 +1,6 @@
 import { NotFoundException } from '@utils/errors'
 import { OffsetPagination } from 'types'
-import { ExtendedUserDTO, UpdateUserDTO, UserDTO, UserViewDTO } from '../dto';
+import { ExtendedUserDTO, UpdateUserDTO, UserViewDTO } from '../dto'
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'
 import 'dotenvrc'
@@ -10,10 +10,14 @@ import { FollowDTO } from '@domains/follower/dto'
 export class UserServiceImpl implements UserService {
   constructor (private readonly repository: UserRepository, private readonly followRepository: FollowRepository) {}
 
-  async getUser (userId: string, searchedUser?: string): Promise<UserViewDTO> {
+  async getUser (userId: string): Promise<UserViewDTO> {
     const user = await this.repository.getById(userId)
     if (!user) throw new NotFoundException('user')
     return await this.userToUserViewDTO(user)
+  }
+
+  async getUsersByUsername (username: string, options: OffsetPagination): Promise<UserViewDTO[]> {
+    return await this.repository.getUsersByUsername(username, options)
   }
 
   async updateUser (userId: string, data: UpdateUserDTO): Promise<UpdateUserDTO> {

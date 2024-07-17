@@ -57,11 +57,21 @@ userRouter.post('/me/profilePicture', BodyValidation(UpdateUserDTO), async (req:
 })
 
 userRouter.get('/:userId', async (req: Request, res: Response) => {
-  const { userId: otherUserId } = req.params
+  const userId = req.params.userId
 
-  const user = await service.getUser(otherUserId)
+  const user = await service.getUser(userId)
 
   return res.status(HttpStatus.OK).json({ user })
+})
+
+userRouter.get('by_username/:username', async (req: Request, res: Response) => {
+  const username = req.params.username
+
+  const { limit, skip } = req.query as Record<string, string>
+
+  const users = await service.getUsersByUsername(username, { limit: Number(limit), skip: Number(skip) })
+
+  return res.status(HttpStatus.OK).json({ users })
 })
 
 userRouter.delete('/', async (req: Request, res: Response) => {

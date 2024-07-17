@@ -3,6 +3,7 @@ import { PostRepository } from '@domains/post/repository'
 import { CommentDTO, CreateCommentInputDTO } from '@domains/comment/dto'
 import { NotFoundException, ValidatePostVisibility } from '@utils'
 import { CommentService } from '@domains/comment/service/comment.service'
+import { CursorPagination } from '@types';
 
 export class CommentServiceImpl implements CommentService {
   constructor (private readonly repository: CommentRepository,
@@ -27,6 +28,12 @@ export class CommentServiceImpl implements CommentService {
   async getPostComments (postId: string, userId: string): Promise<CommentDTO[]> {
     if (!await this.validatePostVisibility.validateUserCanSeePost(userId, postId)) { throw new NotFoundException() }
     const comments = await this.repository.getPostComments(postId)
+    return comments
+  }
+
+  async getPostCommentsPaginated (postId: string, userId: string, options: CursorPagination): Promise<CommentDTO[]> {
+    if (!await this.validatePostVisibility.validateUserCanSeePost(userId, postId)) { throw new NotFoundException() }
+    const comments = await this.repository.getPostCommentsPaginated(postId, options)
     return comments
   }
 }

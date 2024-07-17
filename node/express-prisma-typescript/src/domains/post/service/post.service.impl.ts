@@ -1,4 +1,4 @@
-import { AddMediaInputDTO, CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto';
+import { AddMediaInputDTO, CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto'
 import { PostRepository } from '../repository'
 import { PostService } from '.'
 import { validate } from 'class-validator'
@@ -12,12 +12,14 @@ import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 import s3 from '@utils/s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import * as process from 'process'
+import { ReactionRepository } from '@domains/reaction/repository/reaction.repository'
+import { CommentRepository } from '@domains/comment/repository/comment.repository'
 
 const randomImageName = (bytes = 32): string => crypto.randomBytes(bytes).toString('hex')
 
 export class PostServiceImpl implements PostService {
   constructor (private readonly repository: PostRepository, private readonly followRepository: FollowRepository,
-    private readonly userRepository: UserRepository, private readonly validatePostVisibility: ValidatePostVisibility) {}
+    private readonly userRepository: UserRepository, private readonly validatePostVisibility: ValidatePostVisibility, private readonly reactionsRepository: ReactionRepository, private readonly commentsRepository: CommentRepository) {}
 
   async createPost (userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
     await validate(data)
@@ -48,11 +50,8 @@ export class PostServiceImpl implements PostService {
     const filteredPosts: ExtendedPostDTO[] = []
 
     for (const post of posts) {
-      if (await this.validatePostVisibility.validateUserCanSeePosts(userId, post.authorId)) {
-        const author = await this.userRepository.getById(post.authorId)
-
-        post.images = await Promise.all(post?.images.map(async url => await this.signUrl(url)))
-        filteredPosts.push(new ExtendedPostDTO(post.id, post.authorId, post.content, post.images, post.createdAt, {id: author?.id, name:author?.name, username: author?.username, profilePicture: this.userRepository.} ))
+      if (await this.validatePostVisibility.validateUserCanSeePosts(userId, post.authorId) && !post.isComment) {
+        filteredPosts.push(await this.postToExtendedPostDTO(post))
       }
     }
 
@@ -63,13 +62,14 @@ export class PostServiceImpl implements PostService {
     // TODO: throw exception when the author has a private profile and the user doesn't follow them
 
     if (!await this.validatePostVisibility.validateUserCanSeePosts(userId, authorId)) { throw new NotFoundException() }
-    const posts = await this.repository.getByAuthorId(authorId)
 
-    for (const post of posts) {
-      post.images = await Promise.all(post?.images.map(async url => await this.signUrl(url)))
-    }
+    let posts = await this.repository.getByAuthorId(authorId)
 
-    return posts
+    posts = posts.filter(post => !post.isComment)
+
+    return await Promise.all(posts.map(async post => {
+      return await this.postToExtendedPostDTO(post)
+    }))
   }
 
   async getPostAuthor (postId: string): Promise<UserDTO> {
@@ -121,5 +121,29 @@ export class PostServiceImpl implements PostService {
     const command = new GetObjectCommand(params)
 
     return await getSignedUrl(s3, command, { expiresIn: 3600 })
+  }
+
+  private async postToExtendedPostDTO (post: PostDTO): Promise<ExtendedPostDTO> {
+    const author = await this.userRepository.getById(post.authorId)
+
+    if (!author) { throw new Error('Internal server error') }
+    const extendedPost = {
+      id: post.id,
+      authorId: post.authorId,
+      content: post.content,
+      images: await Promise.all(post?.images.map(async url => await this.signUrl(url))),
+      createdAt: post.createdAt,
+      isComment: post.isComment,
+      author: {
+        id: author.id,
+        name: author.name,
+        username: author.username,
+        profilePicture: await this.userRepository.getProfilePicture(author.id)
+      },
+      qtyComments: (await this.commentsRepository.getPostComments(post.id)).length,
+      qtyLikes: (await this.reactionsRepository.likesByPost(post.id)).length,
+      qtyRetweets: (await this.reactionsRepository.retweetsByPost(post.id)).length
+    }
+    return new ExtendedPostDTO(extendedPost)
   }
 }

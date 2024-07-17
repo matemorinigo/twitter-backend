@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { CommentDTO, CreateCommentInputDTO } from '@domains/comment/dto'
 import { CommentRepository } from '@domains/comment/repository/comment.repository';
+import { CursorPagination } from '@types';
 
 export class CommentRepositoryImpl implements CommentRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -46,6 +47,35 @@ export class CommentRepositoryImpl implements CommentRepository {
       where: {
         postId,
         isComment: true
+      }
+    })
+
+    return comments.map(comment => new CommentDTO(comment))
+  }
+
+  async getPostCommentsPaginated (postId: string, options: CursorPagination): Promise<CommentDTO[]> {
+    const comments = await this.db.post.findMany({
+      cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
+      skip: options.after ?? options.before ? 1 : undefined,
+      take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
+      where: {
+        postId,
+        isComment: true
+      },
+      orderBy: [
+        {
+          reactions: {
+            _count: 'desc'
+          }
+        },
+        {
+          createdAt: 'desc'
+        }
+      ],
+      include: {
+        _count: {
+          select: { reactions: true }
+        }
       }
     })
 

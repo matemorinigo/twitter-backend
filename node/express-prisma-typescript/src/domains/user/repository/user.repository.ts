@@ -9,5 +9,7 @@ export interface UserRepository {
   getById: (userId: string) => Promise<ExtendedUserDTO | null>
   updateUser: (userId: string, data: UpdateUserDTO) => Promise<UpdateUserDTO>
   getByEmailOrUsername: (email?: string, username?: string) => Promise<ExtendedUserDTO | null>
+  getProfilePicture: (userId: string) => Promise<string | null>
+  uploadProfilePicture: (userId: string) => Promise<string>
   userHasProfilePicture: (userId: string) => Promise<boolean>
 }

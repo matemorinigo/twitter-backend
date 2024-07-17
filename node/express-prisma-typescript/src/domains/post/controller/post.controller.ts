@@ -10,6 +10,8 @@ import { PostService, PostServiceImpl } from '../service'
 import { AddMediaInputDTO, CreatePostInputDTO } from '../dto';
 import { FollowRepositoryImpl } from '@domains/follower/repository/follow.repository.impl'
 import { UserRepositoryImpl } from '@domains/user/repository'
+import { ReactionRepositoryImpl } from '@domains/reaction/repository/reaction.repository.impl';
+import { CommentRepositoryImpl } from '@domains/comment/repository/comment.repository.impl';
 
 export const postRouter = Router()
 
@@ -18,7 +20,7 @@ const service: PostService = new PostServiceImpl(new PostRepositoryImpl(db),
   new FollowRepositoryImpl(db),
   new UserRepositoryImpl(db),
   new ValidatePostVisibility(new FollowRepositoryImpl(db), new UserRepositoryImpl(db),
-    new PostRepositoryImpl(db)))
+    new PostRepositoryImpl(db)), new ReactionRepositoryImpl(db), new CommentRepositoryImpl(db))
 
 postRouter.get('/', async (req: Request, res: Response) => {
   const { userId } = res.locals.context

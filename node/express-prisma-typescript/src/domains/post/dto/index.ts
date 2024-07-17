@@ -1,5 +1,6 @@
 import { ArrayMaxSize, IsIn, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ExtendedUserDTO, UserViewDTO } from '@domains/user/dto';
+import { Exclude } from 'class-transformer';
 
 export class CreatePostInputDTO {
   @IsString()
@@ -26,6 +27,7 @@ export class PostDTO {
     this.content = post.content
     this.images = post.images
     this.createdAt = post.createdAt
+    this.isComment = post.isComment
   }
 
   id: string
@@ -33,6 +35,9 @@ export class PostDTO {
   content: string
   images: string[]
   createdAt: Date
+
+  @Exclude()
+    isComment: boolean
 }
 
 export class ExtendedPostDTO extends PostDTO {

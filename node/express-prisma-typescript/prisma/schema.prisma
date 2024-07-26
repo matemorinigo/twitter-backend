@@ -37,6 +37,10 @@ model User {
 
   reactions Reaction[]
 
+  messagesSent Message[] @relation("messagesSent")
+
+  messagesReceived Message[] @relation("messagesReceived")
+
   publicAccount Boolean @default(true)
 }
 
@@ -97,6 +101,22 @@ model Reaction {
 
   @@id([postId, userId, type])
   @@unique([postId, userId, type])
+}
+
+model Message {
+  messageId String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade, name: "messagesSent")
+  senderId String @db.Uuid
+
+  receiver   User   @relation(fields: [receiverId], references: [id], onDelete: Cascade, name: "messagesReceived")
+  receiverId String @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  content String
+  images  String[]
 }
 
 enum ReactionType {

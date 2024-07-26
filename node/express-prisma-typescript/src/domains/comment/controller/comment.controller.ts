@@ -1,38 +1,46 @@
-import { Router, Request, Response } from 'express'
-import {BodyValidation, db, ValidatePostVisibility} from '@utils'
-import { CreateCommentInputDTO } from '@domains/comment/dto'
-import HttpStatus from 'http-status'
-import { CommentServiceImpl } from '@domains/comment/service/comment.service.impl'
-import { CommentService } from '@domains/comment/service/comment.service'
-import { CommentRepositoryImpl } from '@domains/comment/repository/comment.repository.impl'
-import {PostRepositoryImpl} from "@domains/post/repository";
-import {FollowRepositoryImpl} from "@domains/follower/repository/follow.repository.impl";
-import {UserRepositoryImpl} from "@domains/user/repository";
-import 'express-async-errors'
+import { Router, Request, Response } from 'express';
+import { BodyValidation, db, ValidatePostVisibility } from '@utils';
+import { CreateCommentInputDTO } from '@domains/comment/dto';
+import HttpStatus from 'http-status';
+import { CommentServiceImpl } from '@domains/comment/service/comment.service.impl';
+import { CommentService } from '@domains/comment/service/comment.service';
+import { CommentRepositoryImpl } from '@domains/comment/repository/comment.repository.impl';
+import { PostRepositoryImpl } from '@domains/post/repository';
+import { FollowRepositoryImpl } from '@domains/follower/repository/follow.repository.impl';
+import { UserRepositoryImpl } from '@domains/user/repository';
+import 'express-async-errors';
 
-export const commentRouter = Router()
+export const commentRouter = Router();
 
-const service: CommentService = new CommentServiceImpl(new CommentRepositoryImpl(db), new PostRepositoryImpl(db), new ValidatePostVisibility(new FollowRepositoryImpl(db), new UserRepositoryImpl(db), new PostRepositoryImpl(db)))
+const service: CommentService = new CommentServiceImpl(
+  new CommentRepositoryImpl(db),
+  new PostRepositoryImpl(db),
+  new ValidatePostVisibility(new FollowRepositoryImpl(db), new UserRepositoryImpl(db), new PostRepositoryImpl(db))
+);
 
 commentRouter.get('/:postId', async (req: Request, res: Response) => {
-  const { userId } = res.locals.context
-  const { limit, before, after } = req.query as Record<string, string>
+  const { userId } = res.locals.context;
+  const { limit, before, after } = req.query as Record<string, string>;
 
-  const comment = await service.getPostCommentsPaginated(req.params.postId, userId, { limit: Number(limit), before, after })
+  const comment = await service.getPostCommentsPaginated(req.params.postId, userId, {
+    limit: Number(limit),
+    before,
+    after,
+  });
 
-  res.status(HttpStatus.OK).json({ comment })
-})
+  res.status(HttpStatus.OK).json({ comment });
+});
 
 commentRouter.post('/:postId', BodyValidation(CreateCommentInputDTO), async (req: Request, res: Response) => {
-  const { userId } = res.locals.context
+  const { userId } = res.locals.context;
 
-  const comment = await service.comment(req.params.postId, userId, req.body)
+  const comment = await service.comment(req.params.postId, userId, req.body);
 
-  res.status(HttpStatus.OK).json({ comment })
-})
+  res.status(HttpStatus.OK).json({ comment });
+});
 
-commentRouter.get('/:postId/comment/:commentId', async (req: Request, res: Response)=> {
-  const { userId } = res.locals.context
-  const comment = await service.getComment(req.params.postId, req.params.commentId, userId)
-  res.status(HttpStatus.OK).json({ comment })
-})
+commentRouter.get('/:postId/comment/:commentId', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context;
+  const comment = await service.getComment(req.params.postId, req.params.commentId, userId);
+  res.status(HttpStatus.OK).json({ comment });
+});

@@ -21,10 +21,10 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@*": ["./*"],
+      "@*": ["*"]
     }
   },
   "lib": ["es2022"],
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "__tests__/**/*"],
   "exclude": ["node_modules"]
 }

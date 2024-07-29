@@ -25,19 +25,19 @@ commentRouter.get('/:postId', async (req: Request, res: Response) => {
   const comment = await service.getPostCommentsPaginated(req.params.postId, userId, {
     limit: Number(limit),
     before,
-    after,
-  });
+    after
+  })
 
-  res.status(HttpStatus.OK).json({ comment });
-});
+  res.status(HttpStatus.OK).json({ comment })
+})
 
 commentRouter.post('/:postId', BodyValidation(CreateCommentInputDTO), async (req: Request, res: Response) => {
-  const { userId } = res.locals.context;
+  const { userId } = res.locals.context
 
-  const comment = await service.comment(req.params.postId, userId, req.body);
+  const comment = await service.comment(req.params.postId, userId, req.body)
 
-  res.status(HttpStatus.OK).json({ comment });
-});
+  res.status(HttpStatus.OK).json({ comment })
+})
 
 commentRouter.get('/:postId/comment/:commentId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context;

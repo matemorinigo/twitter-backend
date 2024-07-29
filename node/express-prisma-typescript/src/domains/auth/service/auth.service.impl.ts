@@ -20,8 +20,6 @@ export class AuthServiceImpl implements AuthService {
 
     const encryptedPassword = await encryptPassword(data.password)
 
-
-
     const user = await this.repository.create({ ...data, password: encryptedPassword })
     const token = generateAccessToken({ userId: user.id })
 

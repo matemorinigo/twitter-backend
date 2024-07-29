@@ -1,7 +1,7 @@
 import { CommentRepository } from '@domains/comment/repository/comment.repository'
 import { PostRepository } from '@domains/post/repository'
 import { CommentDTO, CreateCommentInputDTO } from '@domains/comment/dto'
-import { NotFoundException, ValidatePostVisibility } from '@utils'
+import { NotFoundException, UnauthorizedException, ValidatePostVisibility } from '@utils';
 import { CommentService } from '@domains/comment/service/comment.service'
 import { CursorPagination } from '@types';
 
@@ -15,6 +15,11 @@ export class CommentServiceImpl implements CommentService {
   }
 
   async deleteComment (postId: string, commentId: string, userId: string): Promise<CommentDTO> {
+    const comment = await this.repository.getComment(postId, commentId)
+
+    if (!comment) { throw new NotFoundException() }
+    if (comment.authorId !== userId) { throw new UnauthorizedException() }
+
     return await this.repository.deleteComment(postId, commentId)
   }
 

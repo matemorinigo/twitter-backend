@@ -26,22 +26,22 @@ export class PostServiceImpl implements PostService {
     return await this.repository.create(userId, data)
   }
 
-  async deletePost (userId: string, postId: string): Promise<void> {
+  async deletePost (userId: string, postId: string): Promise<PostDTO> {
     const post = await this.repository.getById(postId)
     if (!post) throw new NotFoundException('post')
     if (post.authorId !== userId) throw new ForbiddenException()
-    await this.repository.delete(postId)
+    return await this.repository.delete(postId)
   }
 
   async getPost (userId: string, postId: string): Promise<PostDTO> {
     // TODO: validate that the author has public profile or the user follows the author
     if (!(await this.validatePostVisibility.validateUserCanSeePost(userId, postId))) { throw new NotFoundException() }
     const post = await this.repository.getById(postId)
-    if (post?.images) {
-      post.images = await Promise.all(post?.images.map(async url => await this.signUrl(url)))
-    }
     if (!post) throw new NotFoundException('post')
-    return post
+    if (post.images.length > 0) {
+      post.images = await Promise.all(post.images.map(async url => await this.signUrl(url)))
+    }
+    return await this.postToExtendedPostDTO(post)
   }
 
   async getLatestPosts (userId: string, options: CursorPagination): Promise<PostDTO[]> {
@@ -123,7 +123,7 @@ export class PostServiceImpl implements PostService {
     return await getSignedUrl(s3, command, { expiresIn: 3600 })
   }
 
-  private async postToExtendedPostDTO (post: PostDTO): Promise<ExtendedPostDTO> {
+  async postToExtendedPostDTO (post: PostDTO): Promise<ExtendedPostDTO> {
     const author = await this.userRepository.getById(post.authorId)
 
     if (!author) { throw new Error('Internal server error') }

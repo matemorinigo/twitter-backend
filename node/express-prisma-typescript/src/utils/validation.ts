@@ -23,8 +23,14 @@ export function BodyValidation<T> (target: ClassType<T>) {
 }
 
 export class ValidatePostVisibility {
-  constructor (private readonly followRepository: FollowRepository,
-    private readonly userRepository: UserRepository, private readonly postRepository: PostRepository) {}
+  followRepository: FollowRepository
+  userRepository: UserRepository
+  postRepository: PostRepository
+  constructor (followRepository: FollowRepository, userRepository: UserRepository, postRepository: PostRepository) {
+    this.followRepository = followRepository
+    this.userRepository = userRepository
+    this.postRepository = postRepository
+  }
 
   async validateUserCanSeePost (userId: string, postId: string): Promise<boolean> {
     const post = await this.postRepository.getById(postId)

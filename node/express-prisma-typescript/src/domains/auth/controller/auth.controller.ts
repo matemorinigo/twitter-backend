@@ -9,12 +9,10 @@ import { UserRepositoryImpl } from '@domains/user/repository'
 import { AuthService, AuthServiceImpl } from '../service'
 import { LoginInputDTO, SignupInputDTO } from '../dto'
 
-
 export const authRouter = Router()
 
 // Use dependency injection
 const service: AuthService = new AuthServiceImpl(new UserRepositoryImpl(db))
-
 
 
 /**

@@ -18,6 +18,8 @@ const config: Config.InitialOptions = {
     '^@domains$': '<rootDir>/src/domains',
     '^@app$': '<rootDir>/src/app',
     '^@router$': '<rootDir>/src/router',
+    '^@test$': '<rootDir>/__tests__/',
+    '^@test/__mocks__/(.*)$': '<rootDir>/__tests__/__mocks__/$1',
   },
   moduleFileExtensions: [...defaults.moduleFileExtensions, 'mts'],
   extensionsToTreatAsEsm: ['.ts'],

@@ -35,12 +35,14 @@ export class PostRepositoryImpl implements PostRepository {
     return posts.map(post => new PostDTO(post))
   }
 
-  async delete (postId: string): Promise<void> {
-    await this.db.post.delete({
+  async delete (postId: string): Promise<PostDTO> {
+    const post = await this.db.post.delete({
       where: {
         id: postId
       }
     })
+
+    return post
   }
 
   async getById (postId: string): Promise<PostDTO | null> {

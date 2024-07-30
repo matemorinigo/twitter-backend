@@ -51,8 +51,6 @@ export class FollowRepositoryImpl implements FollowRepository {
   }
 
   async isFollowing (followerId: string, followedId: string): Promise<boolean> {
-    // Opcion 1, service se fija si isFollowing para que no pueda seguirlo si ya lo sigue.
-    // Opcion 2, se valida directo en el repository del follow
     const follow = await this.db.follow.findFirst({
       where: {
         followerId,

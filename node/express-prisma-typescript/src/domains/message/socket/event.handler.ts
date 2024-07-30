@@ -22,28 +22,28 @@ export const sendMessageHandler = (io: Server, socket: Socket) => {
       whitelist: true,
       skipMissingProperties: true,
       forbidNonWhitelisted: true
-    });
+    })
 
     if (errors.length > 0) {
-      socket.emit('error', errors);
+      socket.emit('error', errors)
     } else {
       if (
         (await FollowService.isFollowing(userId, receiverId)) &&
         (await FollowService.isFollowing(receiverId, userId))
       ) {
-        await MessageService.send(userId, receiverId, data);
-        socket.to(room).emit('message:receive', { user: userId, data });
+        await MessageService.send(userId, receiverId, data)
+        socket.to(room).emit('message:receive', { user: userId, data })
       }
     }
-  };
+  }
 
   socket.on('message:send', sendMessage);
-};
+}
 
 export const errorMessageHandler = (io: Server, socket: Socket) => {
   const emitError = (err: Error) => {
-    socket.emit('error', err);
-  };
+    socket.emit('error', err)
+  }
 
-  socket.on('error', emitError);
-};
+  socket.on('error', emitError)
+}

@@ -1,13 +1,11 @@
 import { AuthServiceImpl } from '@domains/auth/service'
 import { ConflictException, db, NotFoundException, UnauthorizedException } from '@utils'
-import { UserRepositoryImpl } from '@domains/user/repository'
 import * as auth from '@utils/auth'
 
-const userRepository = new UserRepositoryImpl(db)
-const authService = new AuthServiceImpl(userRepository)
+import { UserRepositoryMock } from '@test/__mocks__/UserRepository.mock'
 
-const getUserByEmailOrUsernameMocked = jest.spyOn(userRepository, 'getByEmailOrUsername')
-const createMocked = jest.spyOn(userRepository, 'create')
+const authService = new AuthServiceImpl(UserRepositoryMock)
+
 const encryptPasswordMocked = jest.spyOn(auth, 'encryptPassword')
 const generateAccessTokenMocked = jest.spyOn(auth, 'generateAccessToken')
 const checkPasswordMocked = jest.spyOn(auth, 'checkPassword')
@@ -20,7 +18,7 @@ describe('auth', () => {
         // a getUserBy... entonces siempre entra en el if que tira la excepcion
         // esta bien?
 
-        getUserByEmailOrUsernameMocked.mockReturnValueOnce(Promise.resolve({
+        UserRepositoryMock.getByEmailOrUsername.mockReturnValueOnce(Promise.resolve({
           id: 'f4555feb-cf56-4aa1-87d9-7032bb4f4245',
           name: 'example',
           createdAt: new Date(),
@@ -40,11 +38,11 @@ describe('auth', () => {
 
     describe('credentials doesn\'t exists', () => {
       it('should create a new user and return an access token', async () => {
-        getUserByEmailOrUsernameMocked.mockReturnValueOnce(Promise.resolve(null))
+        UserRepositoryMock.getByEmailOrUsername.mockReturnValueOnce(Promise.resolve(null))
 
-        encryptPasswordMocked.mockReturnValueOnce(Promise.resolve('secret'))
+        encryptPasswordMocked.mockReturnValue(Promise.resolve('secret'))
 
-        createMocked.mockReturnValueOnce(Promise.resolve({
+        UserRepositoryMock.create.mockReturnValueOnce(Promise.resolve({
           id: 'f4555feb-cf56-4aa1-87d9-7032bb4f4245',
           name: 'example',
           createdAt: new Date(),
@@ -66,7 +64,7 @@ describe('auth', () => {
     describe('user doesn\'t exists', () => {
       it('should throw a NotFoundException', async () => {
 
-        getUserByEmailOrUsernameMocked.mockReturnValueOnce(Promise.resolve(null))
+        UserRepositoryMock.getByEmailOrUsername.mockReturnValueOnce(Promise.resolve(null))
 
         await expect(authService.login({
           username: 'example',
@@ -77,7 +75,7 @@ describe('auth', () => {
 
     describe('user exists but the password is wrong', () => {
       it('should throw an UnauthorizedException', async () => {
-        getUserByEmailOrUsernameMocked.mockReturnValueOnce(Promise.resolve({
+        UserRepositoryMock.getByEmailOrUsername.mockReturnValueOnce(Promise.resolve({
           id: 'f4555feb-cf56-4aa1-87d9-7032bb4f4245',
           name: 'example',
           createdAt: new Date(),

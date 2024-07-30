@@ -10,8 +10,8 @@
     "target": "ES2022",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./src",
-    "rootDir": "./src",
+    "baseUrl": ".", // Base directory for non-relative module names
+    "rootDir": ".", // Include both src and __tests__ directories
     "moduleResolution": "node",
     "incremental": true,
     "skipLibCheck": true,
@@ -21,10 +21,12 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@*": ["*"]
+      "@*": ["src/*"],
+      "@test/*": ["__tests__/*"]
     }
   },
   "lib": ["es2022"],
   "include": ["src/**/*", "__tests__/**/*"],
   "exclude": ["node_modules"]
 }
+

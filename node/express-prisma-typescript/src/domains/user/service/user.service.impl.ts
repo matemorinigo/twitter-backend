@@ -1,5 +1,5 @@
 import { NotFoundException } from '@utils/errors'
-import { OffsetPagination } from 'types'
+import { OffsetPagination } from '@types'
 import { ExtendedUserDTO, UpdateUserDTO, UserViewDTO } from '../dto'
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'

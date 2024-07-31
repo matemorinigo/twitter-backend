@@ -1,6 +1,6 @@
 import { FollowServiceImpl } from '@domains/follower/service/follow.service.impl';
-import { FollowRepositoryMock } from '@test/__mocks__/FollowRepository.mock';
-import { UserRepositoryMock } from '@test/__mocks__/UserRepository.mock';
+import { FollowRepositoryMock } from '../../../__mocks__/FollowRepository.mock';
+import { UserRepositoryMock } from '../../../__mocks__/UserRepository.mock';
 import { ConflictException, NotFoundException } from '@utils';
 
 const followService = new FollowServiceImpl(FollowRepositoryMock, UserRepositoryMock)

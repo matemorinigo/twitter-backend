@@ -18,6 +18,50 @@ const service: AuthService = new AuthServiceImpl(new UserRepositoryImpl(db))
 /**
  * @swagger
  *
+ * components:
+ *   schemas:
+ *     SignupInputDTO:
+ *       type: object
+ *       properties:
+ *         email:
+ *           type: string
+ *           format: email
+ *         username:
+ *           type: string
+ *         password:
+ *           type: string
+ *           format: password
+ *       required:
+ *         - email
+ *         - username
+ *         - password
+ *     token:
+ *       type: object
+ *       properties:
+ *         token:
+ *           type: string
+ *     validationError:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         code:
+ *           type: number
+ *           default: 400
+ *         errors:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               property:
+ *                 type: string
+ *               children:
+ *                 type: array
+ *               constraints:
+ *                 type: object
+ *
+ *
+ *
  * /api/auth/signup:
  *   post:
  *     summary: Register a user
@@ -27,30 +71,14 @@ const service: AuthService = new AuthServiceImpl(new UserRepositoryImpl(db))
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *                 format: password
- *             required:
- *               - email
- *               - username
- *               - password
+ *             $ref: '#/components/schemas/SignupInputDTO'
  *     responses:
- *       200:
+ *       201:
  *         description: User registered and logged successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
+ *               $ref: '#/components/schemas/token'
  *       409:
  *         description: User already exists
  *       400:
@@ -58,24 +86,7 @@ const service: AuthService = new AuthServiceImpl(new UserRepositoryImpl(db))
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 code:
- *                   type: number
- *                   default: 400
- *                 errors:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       property:
- *                         type: string
- *                       children:
- *                         type: array
- *                       constraints:
- *                         type: object
+ *               $ref: '#/components/schemas/validationError'
  *
  */
 
@@ -90,6 +101,49 @@ authRouter.post('/signup', BodyValidation(SignupInputDTO), async (req: Request, 
 /**
  * @swagger
  *
+ * components:
+ *   schemas:
+ *     LoginInputDTO:
+ *       type: object
+ *       properties:
+ *         email:
+ *           type: string
+ *           format: email
+ *         username:
+ *           type: string
+ *         password:
+ *           type: string
+ *           format: password
+ *       required:
+ *         - password
+ *       oneOf:
+ *         - required: [email]
+ *         - required: [username]
+ *     token:
+ *       type: object
+ *       properties:
+ *         token:
+ *           type: string
+ *     validationError:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         code:
+ *           type: number
+ *           default: 400
+ *         errors:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               property:
+ *                 type: string
+ *               children:
+ *                 type: array
+ *               constraints:
+ *                 type: object
+ *
  * /api/auth/login:
  *   post:
  *     summary: Login a user
@@ -99,33 +153,20 @@ authRouter.post('/signup', BodyValidation(SignupInputDTO), async (req: Request, 
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *                 format: password
- *             required:
- *               - password
- *             oneOf:
- *               - required: [email]
- *               - required: [username]
+ *             $ref: '#/components/schemas/LoginInputDTO'
  *     responses:
  *       200:
  *         description: User logged in successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
+ *               $ref: '#/components/schemas/token'
  *       400:
  *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/validationError'
  */
 
 authRouter.post('/login', BodyValidation(LoginInputDTO), async (req: Request, res: Response) => {

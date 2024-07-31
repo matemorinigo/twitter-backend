@@ -1,7 +1,7 @@
-import { FollowRepositoryImpl } from '@domains/follower/repository/follow.repository.impl';
-import { db } from '@utils';
-import { UserRepositoryImpl } from '@domains/user/repository';
-import { PostRepositoryImpl } from '@domains/post/repository';
+import { FollowRepositoryImpl } from '../src/domains/follower/repository/follow.repository.impl';
+import { db } from '../src/utils';
+import { UserRepositoryImpl } from '../src/domains/user/repository';
+import { PostRepositoryImpl } from '../src/domains/post/repository';
 
 const ValidatePostVisibilityMock = {
   followRepository: new FollowRepositoryImpl(db),

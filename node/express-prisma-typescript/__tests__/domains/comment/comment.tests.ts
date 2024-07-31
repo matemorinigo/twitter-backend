@@ -1,11 +1,11 @@
 import { CommentServiceImpl } from '@domains/comment/service/comment.service.impl'
 import { NotFoundException, UnauthorizedException } from '@utils'
 
-import ValidatePostVisibilityMock from '@test/__mocks__/ValidatePostVisibility.mock'
-import PostRepositoryMock from '@test/__mocks__/PostRepository.mock'
-import CommentRepositoryMock from '@test/__mocks__/CommentRepository.mock'
-import { UserRepositoryMock } from '@test/__mocks__/UserRepository.mock';
-import ReactionRepositoryMock from '@test/__mocks__/ReactionRepository.mock';
+import ValidatePostVisibilityMock from '../../../__mocks__/ValidatePostVisibility.mock'
+import PostRepositoryMock from '../../../__mocks__/PostRepository.mock'
+import CommentRepositoryMock from '../../../__mocks__/CommentRepository.mock'
+import { UserRepositoryMock } from '../../../__mocks__/UserRepository.mock';
+import ReactionRepositoryMock from '../../../__mocks__/ReactionRepository.mock';
 
 const commentService = new CommentServiceImpl(CommentRepositoryMock, PostRepositoryMock, UserRepositoryMock, ReactionRepositoryMock, ValidatePostVisibilityMock)
 

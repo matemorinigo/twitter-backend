@@ -1,4 +1,5 @@
 import swaggerJsDoc from 'swagger-jsdoc'
+import { SignupInputDTO, token, validationError } from '@swagger.schemas';
 
 const options = {
   definition: {
@@ -9,7 +10,13 @@ const options = {
       version: '1.0.0'
     }
   },
-  // eslint-disable-next-line n/no-path-concat
+  components: {
+    schemas: {
+      SignupInputDTO,
+      token,
+      validationError
+    }
+  },
   apis: [`${__dirname}/domains/*/controller/*.controller.ts`]
 }
 

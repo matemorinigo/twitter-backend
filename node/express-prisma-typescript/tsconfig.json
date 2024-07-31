@@ -22,7 +22,8 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@*": ["src/*"],
-      "@test/*": ["__tests__/*"]
+      "@test/*": ["__tests__/*"],
+      "@schemas/*": ["swaggerSchemas/*"]
     }
   },
   "lib": ["es2022"],

@@ -1,10 +1,10 @@
 import { PostServiceImpl } from '@domains/post/service'
-import PostRepositoryMock from '@test/__mocks__/PostRepository.mock'
-import { FollowRepositoryMock } from '@test/__mocks__/FollowRepository.mock'
-import { UserRepositoryMock } from '@test/__mocks__/UserRepository.mock'
-import ValidatePostVisibilityMock from '@test/__mocks__/ValidatePostVisibility.mock'
-import ReactionRepositoryMock from '@test/__mocks__/ReactionRepository.mock'
-import CommentRepositoryMock from '@test/__mocks__/CommentRepository.mock'
+import PostRepositoryMock from '../../../__mocks__/PostRepository.mock'
+import { FollowRepositoryMock } from '../../../__mocks__/FollowRepository.mock'
+import { UserRepositoryMock } from '../../../__mocks__/UserRepository.mock'
+import ValidatePostVisibilityMock from '../../../__mocks__/ValidatePostVisibility.mock'
+import ReactionRepositoryMock from '../../../__mocks__/ReactionRepository.mock'
+import CommentRepositoryMock from '../../../__mocks__/CommentRepository.mock'
 import { ForbiddenException, NotFoundException } from '@utils';
 
 const postService = new PostServiceImpl(PostRepositoryMock, FollowRepositoryMock, UserRepositoryMock, ValidatePostVisibilityMock, ReactionRepositoryMock, CommentRepositoryMock)

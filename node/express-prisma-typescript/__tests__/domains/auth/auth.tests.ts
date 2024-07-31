@@ -2,7 +2,7 @@ import { AuthServiceImpl } from '@domains/auth/service'
 import { ConflictException, db, NotFoundException, UnauthorizedException } from '@utils'
 import * as auth from '@utils/auth'
 
-import { UserRepositoryMock } from '@test/__mocks__/UserRepository.mock'
+import { UserRepositoryMock } from '../../../__mocks__/UserRepository.mock'
 
 const authService = new AuthServiceImpl(UserRepositoryMock)
 

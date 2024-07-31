@@ -16,6 +16,45 @@ const service: FollowService = new FollowServiceImpl(new FollowRepositoryImpl(db
 /**
  * @swagger
  *
+ * components:
+ *   schemas:
+ *     notFoundException:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           default: Not found
+ *         code:
+ *           type: number
+ *           default: 404
+ *     conflictException:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           default: Conflict
+ *         code:
+ *           type: number
+ *           default: 409
+ *         errors:
+ *           type: object
+ *           properties:
+ *             error_code:
+ *               type: string
+ *               enum: [CANNOT_FOLLOW_YOURSELF, USER_ALREADY_FOLLOWED]
+ *     FollowDTO:
+ *       type: object
+ *       properties:
+ *         followerId:
+ *           type: string
+ *           format: uuid
+ *         followedId:
+ *           type: string
+ *           format: uuid
+ *         createdAt:
+ *           type: string
+ *           format: date
+ *
  * /api/follower/follow/{userId}:
  *   post:
  *     summary: Follow a user
@@ -33,52 +72,19 @@ const service: FollowService = new FollowServiceImpl(new FollowRepositoryImpl(db
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   format: uuid
- *                 followerId:
- *                   type: string
- *                   format: uuid
- *                 followedId:
- *                   type: string
- *                   format: uuid
- *                 createdAt:
- *                   type: string
- *                   format: date-time
+ *               $ref: '#/components/schemas/FollowDTO'
  *       409:
  *         description: Cannot follow yourself or user already followed
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   default: Conflict
- *                 code:
- *                   type: number
- *                   default: 409
- *                 errors:
- *                   type: object
- *                   properties:
- *                     error_code:
- *                       type: string
- *                       enum: [CANNOT_FOLLOW_YOURSELF, USER_ALREADY_FOLLOWED]
+ *               $ref: '#/components/schemas/conflictException'
  *       404:
  *         description: User not found
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   default: Not found
- *                 code:
- *                   type: number
- *                   default: 404
+ *               $ref: '#/components/schemas/notFoundException'
  */
 
 followRouter.post('/follow/:id', async (req: Request, res: Response) => {

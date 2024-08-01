@@ -1,7 +1,7 @@
 import { CommentRepository } from '@domains/comment/repository/comment.repository'
 import { PostRepository } from '@domains/post/repository'
 import { CommentDTO, CreateCommentInputDTO } from '@domains/comment/dto'
-import { NotFoundException, UnauthorizedException, ValidatePostVisibility } from '@utils';
+import { ForbiddenException, NotFoundException, UnauthorizedException, ValidatePostVisibility } from '@utils';
 import { CommentService } from '@domains/comment/service/comment.service'
 import { CursorPagination } from '@types';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
@@ -24,7 +24,7 @@ export class CommentServiceImpl implements CommentService {
     const comment = await this.repository.getComment(postId, commentId)
 
     if (!comment) { throw new NotFoundException() }
-    if (comment.authorId !== userId) { throw new UnauthorizedException() }
+    if (comment.authorId !== userId) { throw new ForbiddenException() }
 
     return await this.repository.deleteComment(postId, commentId)
   }
@@ -50,8 +50,10 @@ export class CommentServiceImpl implements CommentService {
   }
 
   async getPostCommentsPaginated (postId: string, userId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
-    if (!await this.validatePostVisibility.validateUserCanSeePost(userId, postId)) { throw new NotFoundException() }
-    const comments = await this.repository.getPostCommentsPaginated(postId, options)
+    let comments = await this.repository.getPostCommentsPaginated(postId, options)
+
+    comments = comments.filter(async comment => await this.validatePostVisibility.validateUserCanSeePost(userId, comment.id))
+
     return await Promise.all(comments.map(async comment => await this.commentToExtendedPostDTO(comment)))
   }
 

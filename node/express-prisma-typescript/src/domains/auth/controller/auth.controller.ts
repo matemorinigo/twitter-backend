@@ -14,12 +14,26 @@ export const authRouter = Router()
 // Use dependency injection
 const service: AuthService = new AuthServiceImpl(new UserRepositoryImpl(db))
 
-
 /**
  * @swagger
  *
  * components:
  *   schemas:
+ *     conflictExceptionA:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           default: Conflict
+ *         code:
+ *           type: number
+ *           default: 409
+ *         errors:
+ *           type: object
+ *           properties:
+ *             error_code:
+ *               type: string
+ *               default: USER_ALREADY_EXISTS
  *     SignupInputDTO:
  *       type: object
  *       properties:
@@ -81,6 +95,10 @@ const service: AuthService = new AuthServiceImpl(new UserRepositoryImpl(db))
  *               $ref: '#/components/schemas/token'
  *       409:
  *         description: User already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/conflictExceptionA'
  *       400:
  *         description: Validation error
  *         content:

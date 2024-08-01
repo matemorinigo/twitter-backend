@@ -18,6 +18,7 @@ export class FollowServiceImpl implements FollowService {
   }
 
   async unfollow (followerId: string, followedId: string): Promise<FollowDTO> {
+    if (!await this.repository.isFollowing(followerId, followedId)) { throw new ConflictException('USER_IS_NOT_FOLLOWED') }
     return await this.repository.unfollow(followerId, followedId)
   }
 

@@ -97,9 +97,15 @@ const service: CommentService = new CommentServiceImpl(
  *         schema:
  *           type: integer
  *       - in: query
- *         name: offset
+ *         name: before
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
+ *       - in: query
+ *         name: after
+ *         schema:
+ *           type: string
+ *           format: uuid
  *     responses:
  *       200:
  *         description: Post comments paginated successfully
@@ -109,15 +115,12 @@ const service: CommentService = new CommentServiceImpl(
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/ExtendedPostDTO'
- *       404:
- *         description: Post not found
  *
  */
 
-
 commentRouter.get('/:postId', async (req: Request, res: Response) => {
-  const { userId } = res.locals.context;
-  const { limit, before, after } = req.query as Record<string, string>;
+  const { userId } = res.locals.context
+  const { limit, before, after } = req.query as Record<string, string>
 
   const comment = await service.getPostCommentsPaginated(req.params.postId, userId, {
     limit: Number(limit),
@@ -127,7 +130,6 @@ commentRouter.get('/:postId', async (req: Request, res: Response) => {
 
   res.status(HttpStatus.OK).json({ comment })
 })
-
 
 /**
  * @swagger
@@ -139,6 +141,25 @@ commentRouter.get('/:postId', async (req: Request, res: Response) => {
  *       scheme: bearer
  *       bearerFormat: JWT
  *   schemas:
+ *     validationError:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         code:
+ *           type: number
+ *           default: 400
+ *         errors:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               property:
+ *                 type: string
+ *               children:
+ *                 type: array
+ *               constraints:
+ *                 type: object
  *     notFoundException:
  *       type: object
  *       properties:
@@ -215,7 +236,7 @@ commentRouter.get('/:postId', async (req: Request, res: Response) => {
  *   post:
  *     security:
  *       - bearerAuth: []
- *     summary: Get post comments paginated
+ *     summary: Comment post
  *     tags: [Comment]
  *     parameters:
  *       - in: path
@@ -229,7 +250,7 @@ commentRouter.get('/:postId', async (req: Request, res: Response) => {
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CommentInputDTO'
+ *             $ref: '#/components/schemas/CreateCommentDTO'
  *     responses:
  *       201:
  *         description: Post commented successfully
@@ -239,9 +260,17 @@ commentRouter.get('/:postId', async (req: Request, res: Response) => {
  *               $ref: '#/components/schemas/ExtendedPostDTO'
  *       404:
  *         description: Post not found
- *
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/notFoundException'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/validationError'
  */
-
 
 
 commentRouter.post('/:postId', BodyValidation(CreateCommentInputDTO), async (req: Request, res: Response) => {
@@ -335,6 +364,12 @@ commentRouter.post('/:postId', BodyValidation(CreateCommentInputDTO), async (req
  *         required: true
  *         schema:
  *           type: string
+ *       - in: path
+ *         name: commentId
+ *         description: The comment ID
+ *         required: true
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: Post comment retrieved successfully
@@ -368,6 +403,24 @@ commentRouter.get('/:postId/comment/:commentId', async (req: Request, res: Respo
  *       scheme: bearer
  *       bearerFormat: JWT
  *   schemas:
+ *     forbiddenException:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           default: Forbidden. You are not allowed to perform this action
+ *         code:
+ *           type: number
+ *           default: 403
+ *     notFoundException:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           default: Not found
+ *         code:
+ *           type: number
+ *           default: 404
  *     CommentDTO:
  *       type: object
  *       properties:
@@ -400,7 +453,7 @@ commentRouter.get('/:postId/comment/:commentId', async (req: Request, res: Respo
  *   delete:
  *     security:
  *       - bearerAuth: []
- *     summary: Get post comment
+ *     summary: Delete post comment
  *     tags: [Comment]
  *     parameters:
  *       - in: path
@@ -418,13 +471,19 @@ commentRouter.get('/:postId/comment/:commentId', async (req: Request, res: Respo
  *               $ref: '#/components/schemas/CommentDTO'
  *       404:
  *         description: Comment not found
- *       401:
- *         description: User is not post author
- *
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/notFoundException'
+ *       403:
+ *         description: User is not comment author
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/forbiddenException'
  *
  *
  */
-
 
 commentRouter.delete('/:postId/comment/:commentId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context

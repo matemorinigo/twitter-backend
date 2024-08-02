@@ -223,12 +223,12 @@ followRouter.post('/unfollow/:id', async (req: Request, res: Response) => {
  *                 $ref: '#/components/schemas/FollowDTO'
  */
 
-followRouter.get('/following', async (req: Request, res: Response) =>{
+followRouter.get('/following', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
   const following = await service.getFollowing(userId)
 
-  res.status(HttpStatus.OK).json({ following })
+  res.status(HttpStatus.OK).json(following)
 })
 
 /**
@@ -281,7 +281,7 @@ followRouter.get('/following', async (req: Request, res: Response) =>{
 followRouter.get('/followers', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
-  const following = await service.getFollowers(userId)
+  const followers = await service.getFollowers(userId)
 
-  res.status(HttpStatus.OK).json({ following })
+  res.status(HttpStatus.OK).json(followers)
 })

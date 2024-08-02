@@ -72,19 +72,6 @@ export class PostServiceImpl implements PostService {
     }))
   }
 
-  async getPostAuthor (postId: string): Promise<UserDTO> {
-    const post = await this.repository.getById(postId)
-
-    if (!post) { throw new NotFoundException('post') }
-
-    // I know that user cant be null if it has a post, but typescript not...
-    const user = await this.userRepository.getById(post.authorId)
-
-    if (!user) { throw new NotFoundException('user') }
-
-    return user
-  }
-
   async getUploadMediaPresignedUrl (data: AddMediaInputDTO): Promise< { putObjectUrl: string, objectUrl: string } > {
     if (!['jpg', 'jpeg', 'png'].includes(data.fileType.trim())) {
       throw new ConflictException('File types allowed: jpg, jpeg, png')

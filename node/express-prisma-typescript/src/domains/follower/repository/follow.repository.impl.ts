@@ -29,7 +29,6 @@ export class FollowRepositoryImpl implements FollowRepository {
     return new FollowDTO(follow)
   }
 
-
   async getFollowers (followingId: string): Promise<FollowDTO[]> {
     const followers = await this.db.follow.findMany({
       where: {

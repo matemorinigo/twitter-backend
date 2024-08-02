@@ -1,11 +1,11 @@
 import { CommentServiceImpl } from '@domains/comment/service/comment.service.impl'
-import { NotFoundException, UnauthorizedException } from '@utils'
+import { ForbiddenException, NotFoundException } from '@utils'
 
 import ValidatePostVisibilityMock from '../../../__mocks__/ValidatePostVisibility.mock'
 import PostRepositoryMock from '../../../__mocks__/PostRepository.mock'
 import CommentRepositoryMock from '../../../__mocks__/CommentRepository.mock'
-import { UserRepositoryMock } from '../../../__mocks__/UserRepository.mock';
-import ReactionRepositoryMock from '../../../__mocks__/ReactionRepository.mock';
+import { UserRepositoryMock } from '../../../__mocks__/UserRepository.mock'
+import ReactionRepositoryMock from '../../../__mocks__/ReactionRepository.mock'
 
 const commentService = new CommentServiceImpl(CommentRepositoryMock, PostRepositoryMock, UserRepositoryMock, ReactionRepositoryMock, ValidatePostVisibilityMock)
 
@@ -75,7 +75,7 @@ describe('comment', () => {
           createdAt: date
         })
 
-        await expect(commentService.deleteComment('1', '1', '1')).rejects.toThrow(UnauthorizedException)
+        await expect(commentService.deleteComment('1', '1', '1')).rejects.toThrow(ForbiddenException)
       })
     })
 

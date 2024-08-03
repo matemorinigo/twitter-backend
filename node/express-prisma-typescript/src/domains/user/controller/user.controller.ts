@@ -3,17 +3,18 @@ import HttpStatus from 'http-status'
 // express-async-errors is a module that handles async errors in express, don't forget import it in your new controllers
 import 'express-async-errors'
 
-import { BodyValidation, db } from '@utils'
+import { BodyValidation, db, ValidatePostVisibility } from '@utils';
 
 import { UserRepositoryImpl } from '../repository'
 import { UserService, UserServiceImpl } from '../service'
 import { UpdateUserDTO, UserViewDTO } from '@domains/user/dto';
 import { FollowRepositoryImpl } from '@domains/follower/repository/follow.repository.impl';
+import { PostRepositoryImpl } from '@domains/post/repository';
 
 export const userRouter = Router()
 
 // Use dependency injection
-const service: UserService = new UserServiceImpl(new UserRepositoryImpl(db), new FollowRepositoryImpl(db))
+const service: UserService = new UserServiceImpl(new UserRepositoryImpl(db), new FollowRepositoryImpl(db), new ValidatePostVisibility(new FollowRepositoryImpl(db), new UserRepositoryImpl(db), new PostRepositoryImpl(db)))
 
 /**
  * @swagger
@@ -124,7 +125,7 @@ userRouter.get('/', async (req: Request, res: Response) => {
 userRouter.get('/me', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
-  const user = await service.getUser(userId)
+  const user = await service.getUser(userId, userId)
 
   return res.status(HttpStatus.OK).json({ user })
 })
@@ -431,9 +432,10 @@ userRouter.post('/me/profilePicture', async (req: Request, res: Response) => {
  */
 
 userRouter.get('/:userId', async (req: Request, res: Response) => {
-  const userId = req.params.userId
+  const searchedId = req.params.userId
+  const { userId } = res.locals.context
 
-  const user = await service.getUser(userId)
+  const user = await service.getUser(userId, searchedId)
 
   return res.status(HttpStatus.OK).json({ user })
 })

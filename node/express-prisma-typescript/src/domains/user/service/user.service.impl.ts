@@ -6,13 +6,15 @@ import { UserService } from './user.service'
 import 'dotenvrc'
 import { FollowRepository } from '@domains/follower/repository/follow.repository'
 import { FollowDTO } from '@domains/follower/dto'
+import { ValidatePostVisibility } from '@utils';
 
 export class UserServiceImpl implements UserService {
-  constructor (private readonly repository: UserRepository, private readonly followRepository: FollowRepository) {}
+  constructor (private readonly repository: UserRepository, private readonly followRepository: FollowRepository, private readonly validatePostVisibility: ValidatePostVisibility) {}
 
-  async getUser (userId: string): Promise<UserViewDTO> {
-    const user = await this.repository.getById(userId)
+  async getUser (userId: string, searchedId: string): Promise<UserViewDTO> {
+    const user = await this.repository.getById(searchedId)
     if (!user) throw new NotFoundException('user')
+    if (!await this.validatePostVisibility.validateUserCanSeePosts(userId, searchedId)) { throw new NotFoundException() }
     return await this.userToUserViewDTO(user)
   }
 
@@ -36,9 +38,9 @@ export class UserServiceImpl implements UserService {
         if ((await this.isFollowedByAFollow(user.id, userFollows) || user.publicAccount) && user.id !== userId) { recommendedUsers.push(user) }
       }
       allRecommendedUsers = recommendedUsers
+    } else {
+      allRecommendedUsers = allRecommendedUsers.filter(user => user.id !== userId && user.publicAccount)
     }
-
-    allRecommendedUsers = allRecommendedUsers.filter(user => user.id !== userId && user.publicAccount)
 
     return await Promise.all(allRecommendedUsers.map(async user => await this.userToUserViewDTO(user)))
   }
@@ -57,7 +59,7 @@ export class UserServiceImpl implements UserService {
     return await this.repository.uploadProfilePicture(userId)
   }
 
-  private async isFollowedByAFollow (userId: string, follows: FollowDTO[]): Promise<boolean> {
+  async isFollowedByAFollow (userId: string, follows: FollowDTO[]): Promise<boolean> {
     for (const user of follows) {
       if (await this.followRepository.isFollowing(user.followedId, userId)) { return true }
     }
@@ -70,7 +72,7 @@ export class UserServiceImpl implements UserService {
       id: user.id,
       name: user.name,
       username: user.username,
-      profilePicture: await this.getProfilePicture(user.id)
+      profilePicture: await this.repository.getProfilePicture(user.id)
     })
   }
 }

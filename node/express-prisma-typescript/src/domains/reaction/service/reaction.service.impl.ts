@@ -30,10 +30,12 @@ export class ReactionServiceImpl implements ReactionService {
   }
 
   async likesByUser (authorId: string, userId: string): Promise<ReactPostDTO[]> {
-    return await this.repository.likesByPost(authorId)
+    if (!await this.validatePostVisibility.validateUserCanSeePosts(userId, authorId)) { throw new NotFoundException() }
+    return await this.repository.likesByUser(authorId)
   }
 
   async retweetsByUser (authorId: string, userId: string): Promise<ReactPostDTO[]> {
-    return await this.repository.retweetsByPost(authorId)
+    if (!await this.validatePostVisibility.validateUserCanSeePosts(userId, authorId)) { throw new NotFoundException() }
+    return await this.repository.retweetsByUser(authorId)
   }
 }

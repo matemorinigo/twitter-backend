@@ -120,7 +120,7 @@ reactionRouter.post('/:postId', BodyValidation(ReactBodyDTO), async (req: Reques
 
   const reaction = await service.react(req.params.postId, userId, req.body.type)
 
-  res.status(HttpStatus.OK).json(reaction)
+  return res.status(HttpStatus.OK).json(reaction)
 })
 
 /**
@@ -197,7 +197,7 @@ reactionRouter.get('/likes/:postId', async (req: Request, res: Response) => {
 
   const reactions = await service.likesByPost(req.params.postId, userId)
 
-  res.status(HttpStatus.OK).json(reactions)
+  return res.status(HttpStatus.OK).json(reactions)
 })
 
 /**
@@ -274,7 +274,7 @@ reactionRouter.get('/retweets/:postId', async (req: Request, res: Response) => {
 
   const reactions = await service.retweetsByPost(req.params.postId, userId)
 
-  res.status(HttpStatus.OK).json(reactions)
+  return res.status(HttpStatus.OK).json(reactions)
 })
 
 /**
@@ -351,7 +351,7 @@ reactionRouter.get('/likes/by_user/:userId', async (req: Request, res: Response)
 
   const reactions = await service.likesByUser(req.params.userId, userId)
 
-  res.status(HttpStatus.OK).json(reactions)
+  return res.status(HttpStatus.OK).json(reactions)
 })
 
 /**
@@ -428,7 +428,7 @@ reactionRouter.get('/retweets/by_user/:userId', async (req: Request, res: Respon
 
   const reactions = await service.retweetsByUser(req.params.userId, userId)
 
-  res.status(HttpStatus.OK).json(reactions)
+  return res.status(HttpStatus.OK).json(reactions)
 })
 
 /**
@@ -529,11 +529,10 @@ reactionRouter.get('/retweets/by_user/:userId', async (req: Request, res: Respon
  *               $ref: '#/components/schemas/notFoundException'
  */
 
-
 reactionRouter.delete('/:postId', BodyValidation(ReactBodyDTO), async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
   const reaction = await service.unreact(req.params.postId, userId, req.body.type)
 
-  res.status(HttpStatus.OK).json(reaction)
+  return res.status(HttpStatus.OK).json(reaction)
 })

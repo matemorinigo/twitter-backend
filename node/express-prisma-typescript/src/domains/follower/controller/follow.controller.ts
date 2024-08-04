@@ -99,7 +99,7 @@ followRouter.post('/follow/:id', async (req: Request, res: Response) => {
 
   const follow = await service.follow(userId, req.params.id)
 
-  res.status(HttpStatus.OK).json({ follow })
+  return res.status(HttpStatus.OK).json(follow)
 })
 
 /**
@@ -173,7 +173,7 @@ followRouter.post('/unfollow/:id', async (req: Request, res: Response) => {
 
   const follow = await service.unfollow(userId, req.params.id)
 
-  res.status(HttpStatus.OK).json({ follow })
+  return res.status(HttpStatus.OK).json(follow)
 })
 
 /**
@@ -205,13 +205,6 @@ followRouter.post('/unfollow/:id', async (req: Request, res: Response) => {
  *     tags: [Follower]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - name: userId
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
  *     responses:
  *       200:
  *         description: Users followed retrieved successfully
@@ -228,7 +221,7 @@ followRouter.get('/following', async (req: Request, res: Response) => {
 
   const following = await service.getFollowing(userId)
 
-  res.status(HttpStatus.OK).json(following)
+  return res.status(HttpStatus.OK).json(following)
 })
 
 /**
@@ -260,13 +253,6 @@ followRouter.get('/following', async (req: Request, res: Response) => {
  *     tags: [Follower]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - name: userId
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
  *     responses:
  *       200:
  *         description: Users that follows you retrieved successfully
@@ -283,5 +269,5 @@ followRouter.get('/followers', async (req: Request, res: Response) => {
 
   const followers = await service.getFollowers(userId)
 
-  res.status(HttpStatus.OK).json(followers)
+  return res.status(HttpStatus.OK).json(followers)
 })

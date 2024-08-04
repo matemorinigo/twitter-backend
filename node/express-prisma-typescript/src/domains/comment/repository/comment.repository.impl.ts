@@ -81,4 +81,17 @@ export class CommentRepositoryImpl implements CommentRepository {
 
     return comments.map(comment => new CommentDTO(comment))
   }
+
+  async getCommentsByUserId (userId: string): Promise<CommentDTO[]> {
+    const comments = await this.db.post.findMany({
+      where: {
+        authorId: userId,
+        isComment: true
+      }
+    })
+
+    console.log(comments)
+
+    return comments.map(comment => new CommentDTO(comment))
+  }
 }

@@ -36,6 +36,12 @@ export class CommentServiceImpl implements CommentService {
     return await this.commentToExtendedPostDTO(comment)
   }
 
+  async getCommentsByUserId (userId: string, searchedId: string): Promise<ExtendedPostDTO[]> {
+    const comments = await this.repository.getCommentsByUserId(searchedId)
+    if (!await this.validatePostVisibility.validateUserCanSeePosts(userId, searchedId)) { throw new NotFoundException() }
+    return await Promise.all(comments.map(async comment => await this.commentToExtendedPostDTO(comment)))
+  }
+
   async getPostComments (postId: string, userId: string): Promise<ExtendedPostDTO[]> {
     const comments = await this.repository.getPostComments(postId)
     const filteredComments: CommentDTO[] = []

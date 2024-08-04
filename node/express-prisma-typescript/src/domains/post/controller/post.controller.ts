@@ -522,7 +522,7 @@ postRouter.post('/', BodyValidation(CreatePostInputDTO), async (req: Request, re
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreatePostInputDTO'
+ *             $ref: '#/components/schemas/AddMediaInputDTO'
  *     responses:
  *       200:
  *         description: Upload media url retrieved successfully
@@ -549,7 +549,7 @@ postRouter.post('/add_media', BodyValidation(AddMediaInputDTO), async (req: Requ
 
   const urls = await service.getUploadMediaPresignedUrl(data)
 
-  return res.status(HttpStatus.CREATED).json({ urls })
+  return res.status(HttpStatus.CREATED).json(urls)
 })
 
 /**

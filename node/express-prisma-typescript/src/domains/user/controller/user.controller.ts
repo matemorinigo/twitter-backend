@@ -54,8 +54,8 @@ const service: UserService = new UserServiceImpl(new UserRepositoryImpl(db), new
  *         name: limit
  *         schema:
  *           type: integer
- *       - in: skip
- *         name: before
+ *       - in: query
+ *         name: skip
  *         schema:
  *           type: integer
  *     responses:
@@ -76,7 +76,7 @@ userRouter.get('/', async (req: Request, res: Response) => {
 
   const users: UserViewDTO[] = await service.getUserRecommendations(userId, { limit: Number(limit), skip: Number(skip) })
 
-  return res.status(HttpStatus.OK).json({ users })
+  return res.status(HttpStatus.OK).json(users)
 })
 
 /**
@@ -127,7 +127,7 @@ userRouter.get('/me', async (req: Request, res: Response) => {
 
   const user = await service.getUser(userId, userId)
 
-  return res.status(HttpStatus.OK).json({ user })
+  return res.status(HttpStatus.OK).json(user)
 })
 
 /**
@@ -218,7 +218,7 @@ userRouter.post('/me', BodyValidation(UpdateUserDTO), async (req: Request, res: 
 
   const updatedUser = await service.updateUser(userId, req.body)
 
-  return res.status(HttpStatus.OK).json({ updatedUser })
+  return res.status(HttpStatus.OK).json(updatedUser)
 })
 
 /**
@@ -294,15 +294,8 @@ userRouter.post('/me', BodyValidation(UpdateUserDTO), async (req: Request, res: 
  *   get:
  *     security:
  *       - bearerAuth: []
- *     summary: Get profile picture url
+ *     summary: Get your profile picture url
  *     tags: [User]
- *     parameters:
- *       - name: postId
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
  *     responses:
  *       200:
  *         description: Profile picture url retrieved successfully
@@ -364,7 +357,7 @@ userRouter.post('/me/profilePicture', async (req: Request, res: Response) => {
 
   const updateProfilePictureURL = await service.uploadProfilePicture(userId)
 
-  return res.status(HttpStatus.OK).json({ updateProfilePictureURL })
+  return res.status(HttpStatus.OK).json(updateProfilePictureURL)
 })
 
 /**
@@ -437,7 +430,7 @@ userRouter.get('/:userId', async (req: Request, res: Response) => {
 
   const user = await service.getUser(userId, searchedId)
 
-  return res.status(HttpStatus.OK).json({ user })
+  return res.status(HttpStatus.OK).json(user)
 })
 
 /**
@@ -505,7 +498,7 @@ userRouter.get('/by_username/:username', async (req: Request, res: Response) => 
 
   const users = await service.getUsersByUsername(username, { limit: Number(limit), skip: Number(skip) })
 
-  return res.status(HttpStatus.OK).json({ users })
+  return res.status(HttpStatus.OK).json(users)
 })
 
 /**

@@ -122,13 +122,107 @@ commentRouter.get('/:postId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { limit, before, after } = req.query as Record<string, string>
 
-  const comment = await service.getPostCommentsPaginated(req.params.postId, userId, {
+  const comments = await service.getPostCommentsPaginated(req.params.postId, userId, {
     limit: Number(limit),
     before,
     after
   })
 
-  res.status(HttpStatus.OK).json({ comment })
+  return res.status(HttpStatus.OK).json(comments)
+})
+
+/**
+ * @swagger
+ *
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *   schemas:
+ *     UserViewDTO:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *         name:
+ *           type: string
+ *         username:
+ *           type: string
+ *         profilePicture:
+ *           type: string
+ *           format: url
+ *           nullable: true
+ *     ExtendedPostDTO:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *           description: The post ID
+ *         authorId:
+ *           type: string
+ *           format: uuid
+ *         content:
+ *           type: string
+ *         images:
+ *           type: array
+ *           items:
+ *             images:
+ *               type: string
+ *           minItems: 0
+ *           maxItems: 4
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         author:
+ *           $ref: '#components/schemas/UserViewDTO'
+ *         qtyComments:
+ *           type: number
+ *           minimum: 0
+ *         qtyLikes:
+ *           type: number
+ *           minimum: 0
+ *         qtyRetweets:
+ *           type: number
+ *           minimum: 0
+ *
+ *
+ *
+ * /api/comments/by_user/{userId}:
+ *   get:
+ *     security:
+ *       - bearerAuth: []
+ *     summary: Get user comments
+ *     tags: [Comment]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         description: The user ID
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User comments retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ExtendedPostDTO'
+ *
+ */
+
+commentRouter.get('/by_user/:userId', async (req: Request, res: Response) => {
+  const { loggedUser } = res.locals.context
+  const { userId } = req.params
+
+  const comments = await service.getCommentsByUserId(loggedUser, userId)
+
+  return res.status(HttpStatus.OK).json(comments)
 })
 
 /**
@@ -272,13 +366,12 @@ commentRouter.get('/:postId', async (req: Request, res: Response) => {
  *               $ref: '#/components/schemas/validationError'
  */
 
-
 commentRouter.post('/:postId', BodyValidation(CreateCommentInputDTO), async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
   const comment = await service.comment(req.params.postId, userId, req.body)
 
-  res.status(HttpStatus.CREATED).json({ comment })
+  return res.status(HttpStatus.CREATED).json(comment)
 })
 
 
@@ -389,7 +482,7 @@ commentRouter.post('/:postId', BodyValidation(CreateCommentInputDTO), async (req
 commentRouter.get('/:postId/comment/:commentId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const comment = await service.getComment(req.params.postId, req.params.commentId, userId)
-  res.status(HttpStatus.OK).json({ comment })
+  return res.status(HttpStatus.OK).json(comment)
 })
 
 
@@ -488,5 +581,5 @@ commentRouter.get('/:postId/comment/:commentId', async (req: Request, res: Respo
 commentRouter.delete('/:postId/comment/:commentId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const comment = await service.deleteComment(req.params.postId, req.params.commentId, userId)
-  res.status(HttpStatus.OK).json({ comment })
+  return res.status(HttpStatus.OK).json(comment)
 })

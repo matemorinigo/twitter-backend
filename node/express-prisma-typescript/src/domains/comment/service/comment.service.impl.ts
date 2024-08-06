@@ -56,11 +56,16 @@ export class CommentServiceImpl implements CommentService {
   }
 
   async getPostCommentsPaginated (postId: string, userId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
-    let comments = await this.repository.getPostCommentsPaginated(postId, options)
+    const comments = await this.repository.getPostCommentsPaginated(postId, options)
+    const filteredComments: CommentDTO[] = []
 
-    comments = comments.filter(async comment => await this.validatePostVisibility.validateUserCanSeePost(userId, comment.id))
+    for (const comment of comments) {
+      if (await this.validatePostVisibility.validateUserCanSeePost(userId, comment.id)) {
+        filteredComments.push(comment)
+      }
+    }
 
-    return await Promise.all(comments.map(async comment => await this.commentToExtendedPostDTO(comment)))
+    return await Promise.all(filteredComments.map(async comment => await this.commentToExtendedPostDTO(comment)))
   }
 
   private async signUrl (url: string): Promise<string> {

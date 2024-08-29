@@ -3,7 +3,8 @@ const CommentRepositoryMock = {
   deleteComment: jest.fn(),
   getComment: jest.fn(),
   getPostComments: jest.fn(),
-  getPostCommentsPaginated: jest.fn()
-}
+  getPostCommentsPaginated: jest.fn(),
+  getCommentsByUserId: jest.fn(),
+};
 
-export default CommentRepositoryMock
+export default CommentRepositoryMock;

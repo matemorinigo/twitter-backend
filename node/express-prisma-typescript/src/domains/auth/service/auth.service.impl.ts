@@ -7,7 +7,7 @@ import {
   NotFoundException,
   UnauthorizedException
 } from '@utils'
-
+import jwt from 'jsonwebtoken'
 import { LoginInputDTO, SignupInputDTO, TokenDTO } from '../dto'
 import { AuthService } from './auth.service'
 
@@ -37,5 +37,9 @@ export class AuthServiceImpl implements AuthService {
     const token = generateAccessToken({ userId: user.id })
 
     return { token }
+  }
+
+  async validateToken(token: string): Promise<boolean> {
+    jwt
   }
 }

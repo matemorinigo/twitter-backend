@@ -1,5 +1,6 @@
 /node_modules/
 .envrc
 /dist/
-./.idea/
+/coverage/
+/prisma/
 .env

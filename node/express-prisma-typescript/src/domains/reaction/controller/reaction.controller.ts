@@ -133,6 +133,15 @@ reactionRouter.post('/:postId', BodyValidation(ReactBodyDTO), async (req: Reques
  *       scheme: bearer
  *       bearerFormat: JWT
  *   schemas:
+ *     invalidType:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           default: Invalid type
+ *         code:
+ *           type: number
+ *           default: 400
  *     notFoundException:
  *       type: object
  *       properties:
@@ -163,11 +172,11 @@ reactionRouter.post('/:postId', BodyValidation(ReactBodyDTO), async (req: Reques
  *
  *
  *
- * /api/reaction/likes/{postId}:
+ * /api/reaction/{postId}:
  *   get:
  *     security:
  *       - bearerAuth: []
- *     summary: Get post likes
+ *     summary: Get post reactions by type
  *     tags: [Reaction]
  *     parameters:
  *       - in: path
@@ -175,9 +184,14 @@ reactionRouter.post('/:postId', BodyValidation(ReactBodyDTO), async (req: Reques
  *         required: true
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: type
+ *         required: true
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: Post likes retrieved successfully
+ *         description: Post reactions retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -190,92 +204,37 @@ reactionRouter.post('/:postId', BodyValidation(ReactBodyDTO), async (req: Reques
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/notFoundException'
+ *       400:
+ *        description: Invalid type
+ *        content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/invalidType'
  */
 
-reactionRouter.get('/likes/:postId', async (req: Request, res: Response) => {
+reactionRouter.get('/:postId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
+  let reactions
 
-  const reactions = await service.likesByPost(req.params.postId, userId)
+
+  switch (req.query.type) {
+    case "LIKE":
+      reactions = await service.likesByPost(req.params.postId, userId)
+      break;
+    case "RETWEET":
+      reactions = await service.retweetsByPost(req.params.postId, userId)
+      break;
+    case "ALL":
+      reactions = [...await service.retweetsByPost(req.params.postId, userId), ...await service.likesByPost(req.params.postId, userId)]
+      break;
+    default:
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: 'Invalid type', code: HttpStatus.BAD_REQUEST })
+
+  }
 
   return res.status(HttpStatus.OK).json(reactions)
 })
 
-/**
- * @swagger
- *
- * components:
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- *   schemas:
- *     notFoundException:
- *       type: object
- *       properties:
- *         message:
- *           type: string
- *           default: Not found
- *         code:
- *           type: number
- *           default: 404
- *     ReactPostDTOB:
- *       type: object
- *       properties:
- *         type:
- *           type: string
- *           example: RETWEET
- *         postId:
- *           type: string
- *           format: uuid
- *         userId:
- *           type: string
- *           format: uuid
- *     ReactBodyDTO:
- *       type: object
- *       properties:
- *         type:
- *           type: string
- *           enum: [LIKE, RETWEET]
- *
- *
- *
- * /api/reaction/retweets/{postId}:
- *   get:
- *     security:
- *       - bearerAuth: []
- *     summary: Get post retweets
- *     tags: [Reaction]
- *     parameters:
- *       - in: path
- *         name: postId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Post retweets retrieved successfully successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/ReactPostDTOB'
- *       404:
- *         description: Post not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/notFoundException'
- */
-
-reactionRouter.get('/retweets/:postId', async (req: Request, res: Response) => {
-  const { userId } = res.locals.context
-
-  const reactions = await service.retweetsByPost(req.params.postId, userId)
-
-  return res.status(HttpStatus.OK).json(reactions)
-})
 
 /**
  * @swagger

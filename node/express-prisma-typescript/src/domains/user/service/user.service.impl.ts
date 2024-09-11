@@ -1,32 +1,34 @@
 import { NotFoundException } from '@utils/errors'
 import { OffsetPagination } from '@types'
-import { ExtendedUserDTO, UpdateUserDTO, UserViewDTO } from '../dto'
+import { ExtendedUserDTO, UpdateUserDTO, UserProfileDTO, UserViewDTO } from '../dto'
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'
 import 'dotenvrc'
 import { FollowRepository } from '@domains/follower/repository/follow.repository'
 import { FollowDTO } from '@domains/follower/dto'
 import { ValidatePostVisibility } from '@utils';
+import { PostRepository } from '@domains/post/repository'
+import { PostService } from '@domains/post/service'
 
 export class UserServiceImpl implements UserService {
-  constructor (private readonly repository: UserRepository, private readonly followRepository: FollowRepository, private readonly validatePostVisibility: ValidatePostVisibility) {}
+  constructor(private readonly repository: UserRepository, private readonly followRepository: FollowRepository, private readonly validatePostVisibility: ValidatePostVisibility, private readonly postService: PostService) { }
 
-  async getUser (userId: string, searchedId: string): Promise<UserViewDTO> {
+  async getUser(userId: string, searchedId: string): Promise<UserViewDTO> {
     const user = await this.repository.getById(searchedId)
     if (!user) throw new NotFoundException('user')
     if (!await this.validatePostVisibility.validateUserCanSeePosts(userId, searchedId)) { throw new NotFoundException() }
     return await this.userToUserViewDTO(user)
   }
 
-  async getUsersByUsername (username: string, options: OffsetPagination): Promise<UserViewDTO[]> {
+  async getUsersByUsername(username: string, options: OffsetPagination): Promise<UserViewDTO[]> {
     return await this.repository.getUsersByUsername(username, options)
   }
 
-  async updateUser (userId: string, data: UpdateUserDTO): Promise<UpdateUserDTO> {
+  async updateUser(userId: string, data: UpdateUserDTO): Promise<UpdateUserDTO> {
     return await this.repository.updateUser(userId, data)
   }
 
-  async getUserRecommendations (userId: any, options: OffsetPagination): Promise<UserViewDTO[]> {
+  async getUserRecommendations(userId: any, options: OffsetPagination): Promise<UserViewDTO[]> {
     // TODO: make this return only users followed by users the original user follows
     const userFollows: FollowDTO[] = await this.followRepository.getFollowing(userId)
 
@@ -35,7 +37,7 @@ export class UserServiceImpl implements UserService {
     if (userFollows.length > 0) {
       const recommendedUsers: ExtendedUserDTO[] = []
       for (const user of allRecommendedUsers) {
-        if ((await this.isFollowedByAFollow(user.id, userFollows) || user.publicAccount) && user.id !== userId) { recommendedUsers.push(user) }
+        if ((await this.isFollowedByAFollow(user.id, userFollows) || user.publicAccount) && user.id !== userId && !(await this.followRepository.isFollowing(userId, user.id))) { recommendedUsers.push(user) }
       }
       allRecommendedUsers = recommendedUsers
     } else {
@@ -45,21 +47,21 @@ export class UserServiceImpl implements UserService {
     return await Promise.all(allRecommendedUsers.map(async user => await this.userToUserViewDTO(user)))
   }
 
-  async deleteUser (userId: any): Promise<void> {
+  async deleteUser(userId: any): Promise<void> {
     await this.repository.delete(userId)
   }
 
-  async getProfilePicture (userId: string): Promise<string | null> {
+  async getProfilePicture(userId: string): Promise<string | null> {
     return await this.repository.getProfilePicture(userId)
   }
 
-  async uploadProfilePicture (userId: string): Promise<string> {
+  async uploadProfilePicture(userId: string): Promise<string> {
     await this.repository.updateUser(userId, { profilePictureKey: userId })
 
     return await this.repository.uploadProfilePicture(userId)
   }
 
-  async isFollowedByAFollow (userId: string, follows: FollowDTO[]): Promise<boolean> {
+  async isFollowedByAFollow(userId: string, follows: FollowDTO[]): Promise<boolean> {
     for (const user of follows) {
       if (await this.followRepository.isFollowing(user.followedId, userId)) { return true }
     }
@@ -67,12 +69,28 @@ export class UserServiceImpl implements UserService {
     return false
   }
 
-  private async userToUserViewDTO (user: ExtendedUserDTO): Promise<UserViewDTO> {
+  private async userToUserViewDTO(user: ExtendedUserDTO): Promise<UserViewDTO> {
     return new UserViewDTO({
       id: user.id,
       name: user.name,
       username: user.username,
       profilePicture: await this.repository.getProfilePicture(user.id)
     })
+  }
+
+  async getProfile(userId: string): Promise<UserProfileDTO> {
+    const user = await this.repository.getById(userId);
+    if (!user) throw new NotFoundException('user')
+    const followers = await this.followRepository.getFollowers(userId);
+    const following = await this.followRepository.getFollowing(userId);
+    const profilePicture = await this.repository.getProfilePicture(userId) ?? undefined;
+    const posts = await this.postService.getPostsByAuthor(userId, userId);
+    return {
+      ...user,
+      followers,
+      following,
+      profilePicture, 
+      posts
+    }
   }
 }

@@ -1,6 +1,8 @@
 import { ArrayMaxSize, IsIn, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ExtendedUserDTO, UserViewDTO } from '@domains/user/dto';
 import { Exclude } from 'class-transformer';
+import { ReactPostDTO } from '@domains/reaction/dto';
+import { CommentDTO } from '@domains/comment/dto';
 
 export class CreatePostInputDTO {
   @IsString()
@@ -16,7 +18,6 @@ export class CreatePostInputDTO {
 export class AddMediaInputDTO {
   @IsString()
   @IsNotEmpty()
-  @MaxLength(5)
     fileType!: string
 }
 
@@ -47,10 +48,14 @@ export class ExtendedPostDTO extends PostDTO {
     this.qtyComments = post.qtyComments
     this.qtyLikes = post.qtyLikes
     this.qtyRetweets = post.qtyRetweets
+    this.comments = post.comments
+    this.reactions = post.reactions
   }
 
   author!: UserViewDTO
   qtyComments!: number
   qtyLikes!: number
   qtyRetweets!: number
+  reactions!: ReactPostDTO[]
+  comments!: CommentDTO[]
 }

@@ -22,6 +22,7 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async getById (userId: any): Promise<ExtendedUserDTO | null> {
+    console.log(userId)
     const user = await this.db.user.findUnique({
       where: {
         id: userId

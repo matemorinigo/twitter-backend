@@ -90,8 +90,6 @@ export class CommentRepositoryImpl implements CommentRepository {
       }
     })
 
-    console.log(comments)
-
     return comments.map(comment => new CommentDTO(comment))
   }
 }

@@ -11,7 +11,7 @@ import { validate } from 'class-validator';
 const FollowService = new FollowServiceImpl(new FollowRepositoryImpl(db), new UserRepositoryImpl(db));
 
 export const authMiddleware = (socket: Socket, next: (err?: Error | undefined) => void): void => {
-  const token = socket.handshake.query?.token;
+  const token = socket.handshake.auth.token ? (socket.handshake.auth.token).split(' ')[1] : '';
 
   if (typeof token === 'string') {
     jwt.verify(token, Constants.TOKEN_SECRET, (err, context) => {
@@ -32,5 +32,6 @@ export const joinRoomsMiddleware = async (socket: Socket, next: (err?: Error | u
     const followedUsers = await FollowService.getFollowing(userId);
     await socket.join(followedUsers.map((follow) => `${follow.followedId}-${userId}`));
   }
+  console.log('join entre')
   next();
 };

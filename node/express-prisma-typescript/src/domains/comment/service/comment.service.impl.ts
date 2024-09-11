@@ -103,7 +103,9 @@ export class CommentServiceImpl implements CommentService {
       },
       qtyComments: (await this.repository.getPostComments(post.id)).length,
       qtyLikes: (await this.reactionsRepository.likesByPost(post.id)).length,
-      qtyRetweets: (await this.reactionsRepository.retweetsByPost(post.id)).length
+      qtyRetweets: (await this.reactionsRepository.retweetsByPost(post.id)).length,
+      reactions: [...await this.reactionsRepository.likesByPost(post.id), ...await this.reactionsRepository.retweetsByPost(post.id)],
+      comments: await this.repository.getPostComments(post.id)
     }
     return new ExtendedPostDTO(extendedPost)
   }

@@ -1,6 +1,6 @@
-import { MessageRepository } from '@domains/message/repository/message.repository';
 import { MessageService } from '@domains/message/service/message.service';
 import { MessageDTO, MessageInputDTO } from '@domains/message/dto';
+import { MessageRepository } from '../repository/message.repository';
 
 export class MessageServiceImpl implements MessageService {
   constructor (private readonly repository: MessageRepository) {}

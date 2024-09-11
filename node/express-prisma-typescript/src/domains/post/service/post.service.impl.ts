@@ -17,6 +17,11 @@ import { CommentRepository } from '@domains/comment/repository/comment.repositor
 
 const randomImageName = (bytes = 32): string => crypto.randomBytes(bytes).toString('hex')
 
+export interface PaginatedPosts {
+  data: ExtendedPostDTO[],
+  nextCursor: string | undefined
+}
+ 
 export class PostServiceImpl implements PostService {
   constructor (private readonly repository: PostRepository, private readonly followRepository: FollowRepository,
     private readonly userRepository: UserRepository, private readonly validatePostVisibility: ValidatePostVisibility, private readonly reactionsRepository: ReactionRepository, private readonly commentsRepository: CommentRepository) {}
@@ -44,7 +49,7 @@ export class PostServiceImpl implements PostService {
     return await this.postToExtendedPostDTO(post)
   }
 
-  async getLatestPosts (userId: string, options: CursorPagination): Promise<PostDTO[]> {
+  async getLatestPosts (userId: string, options: CursorPagination): Promise<PaginatedPosts> {
     // TODO: filter post search to return posts from authors that the user follows
     const posts = await this.repository.getAllByDatePaginated(options)
     const filteredPosts: ExtendedPostDTO[] = []
@@ -55,10 +60,31 @@ export class PostServiceImpl implements PostService {
       }
     }
 
-    return filteredPosts
+    const nextCursor = filteredPosts.length > 0 ? filteredPosts[filteredPosts.length - 1].id: undefined
+
+    return {
+      data: filteredPosts,
+      nextCursor}
   }
 
-  async getPostsByAuthor (userId: any, authorId: string): Promise<PostDTO[]> {
+  async getLatestFollowingPosts (userId: string, options: CursorPagination): Promise<PaginatedPosts> {
+    // TODO: filter post search to return posts from authors that the user follows
+    const posts = await this.repository.getFollowingByDatePaginated(options, userId)
+    const filteredPosts: ExtendedPostDTO[] = []
+
+    for (const post of posts) {
+      if (await this.validatePostVisibility.validateUserCanSeePosts(userId, post.authorId) && !post.isComment) {
+        filteredPosts.push(await this.postToExtendedPostDTO(post))
+      }
+    }
+    const nextCursor = filteredPosts.length > 0 ? filteredPosts[filteredPosts.length - 1].id: undefined
+
+    return {
+      data: filteredPosts,
+      nextCursor}
+  }
+
+  async getPostsByAuthor (userId: any, authorId: string): Promise<ExtendedPostDTO[]> {
     // TODO: throw exception when the author has a private profile and the user doesn't follow them
 
     if (!await this.validatePostVisibility.validateUserCanSeePosts(userId, authorId)) { throw new NotFoundException() }
@@ -73,7 +99,7 @@ export class PostServiceImpl implements PostService {
   }
 
   async getUploadMediaPresignedUrl (data: AddMediaInputDTO): Promise< { putObjectUrl: string, objectUrl: string } > {
-    if (!['jpg', 'jpeg', 'png'].includes(data.fileType.trim())) {
+    if (!['image/jpg', 'image/jpeg', 'image/png'].includes(data.fileType)) {
       throw new ConflictException('File types allowed: jpg, jpeg, png')
     }
 
@@ -129,8 +155,11 @@ export class PostServiceImpl implements PostService {
       },
       qtyComments: (await this.commentsRepository.getPostComments(post.id)).length,
       qtyLikes: (await this.reactionsRepository.likesByPost(post.id)).length,
-      qtyRetweets: (await this.reactionsRepository.retweetsByPost(post.id)).length
+      qtyRetweets: (await this.reactionsRepository.retweetsByPost(post.id)).length,
+      reactions: await Promise.all([...await this.reactionsRepository.likesByPost(post.id), ...await this.reactionsRepository.retweetsByPost(post.id)]),
+      comments: await this.commentsRepository.getPostComments(post.id)
     }
+  1
     return new ExtendedPostDTO(extendedPost)
   }
 }

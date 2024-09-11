@@ -1,3 +1,5 @@
+import { FollowDTO } from '@domains/follower/dto'
+import { ExtendedPostDTO } from '@domains/post/dto'
 import { IsOptional } from 'class-validator'
 
 export class UserDTO {
@@ -64,4 +66,17 @@ export class UpdateUserDTO {
     this.publicAccount = user?.publicAccount
     this.profilePictureKey = user?.profilePictureKey
   }
+
+}
+
+export interface UserProfileDTO {
+  id: string;
+  name?: string;
+  username: string;
+  profilePicture?: string;
+  publicAccount: boolean;
+  createdAt: Date;
+  followers: FollowDTO[];
+  following: FollowDTO[];
+  posts: ExtendedPostDTO[];
 }

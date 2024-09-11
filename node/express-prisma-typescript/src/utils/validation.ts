@@ -12,7 +12,7 @@ export function BodyValidation<T> (target: ClassType<T>) {
     req.body = plainToInstance(target, req.body)
     const errors = await validate(req.body, {
       whitelist: true,
-      skipMissingProperties: true,
+      skipMissingProperties: false,
       forbidNonWhitelisted: true
     })
 

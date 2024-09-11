@@ -271,3 +271,11 @@ followRouter.get('/followers', async (req: Request, res: Response) => {
 
   return res.status(HttpStatus.OK).json(followers)
 })
+
+followRouter.get('/mutuals', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+
+  const mutuals = await service.getMutuals(userId)
+
+  return res.status(HttpStatus.OK).json(mutuals)
+})

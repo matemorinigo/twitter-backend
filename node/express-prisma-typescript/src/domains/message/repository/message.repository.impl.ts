@@ -41,9 +41,20 @@ export class MessageRepositoryImpl implements MessageRepository {
   async chatHistory(senderId: string, receiverId: string): Promise<MessageDTO[]> {
     const msgs = await this.db.message.findMany({
       where: {
-        senderId,
-        receiverId,
+        OR: [
+          {
+            senderId,
+            receiverId,
+          },
+          {
+            senderId: receiverId,
+            receiverId: senderId
+          }
+        ]
       },
+      orderBy: {
+        createdAt: 'asc'
+      }
     });
 
     return msgs.map((msg) => new MessageDTO(msg));

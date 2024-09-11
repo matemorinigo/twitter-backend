@@ -38,8 +38,6 @@
     "unique-names-generator": "^4.7.1"
   },
   "devDependencies": {
-    "@jridgewell/trace-mapping": "^0.3.25",
-    "@types/": "jridgewell/trace-mapping",
     "@types/bcrypt": "^5.0.0",
     "@types/cookie-parser": "^1.4.3",
     "@types/cors": "^2.8.13",

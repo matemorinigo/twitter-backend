@@ -10,11 +10,35 @@ import { UserService, UserServiceImpl } from '../service'
 import { UpdateUserDTO, UserViewDTO } from '@domains/user/dto';
 import { FollowRepositoryImpl } from '@domains/follower/repository/follow.repository.impl';
 import { PostRepositoryImpl } from '@domains/post/repository';
+import { PostServiceImpl } from '@domains/post/service';
+import { ReactionRepositoryImpl } from '@domains/reaction/repository/reaction.repository.impl';
+import { CommentRepositoryImpl } from '@domains/comment/repository/comment.repository.impl';
 
 export const userRouter = Router()
 
+
 // Use dependency injection
-const service: UserService = new UserServiceImpl(new UserRepositoryImpl(db), new FollowRepositoryImpl(db), new ValidatePostVisibility(new FollowRepositoryImpl(db), new UserRepositoryImpl(db), new PostRepositoryImpl(db)))
+const service: UserService = new UserServiceImpl(
+  new UserRepositoryImpl(db),
+  new FollowRepositoryImpl(db),
+  new ValidatePostVisibility(
+    new FollowRepositoryImpl(db),
+    new UserRepositoryImpl(db),
+    new PostRepositoryImpl(db)
+  ),
+  new PostServiceImpl(
+    new PostRepositoryImpl(db),
+    new FollowRepositoryImpl(db),
+    new UserRepositoryImpl(db),
+    new ValidatePostVisibility(
+      new FollowRepositoryImpl(db),
+      new UserRepositoryImpl(db),
+      new PostRepositoryImpl(db)
+    ),
+    new ReactionRepositoryImpl(db),
+    new CommentRepositoryImpl(db)
+  )
+)
 
 /**
  * @swagger
@@ -433,6 +457,15 @@ userRouter.get('/:userId', async (req: Request, res: Response) => {
   return res.status(HttpStatus.OK).json(user)
 })
 
+userRouter.get('/profile/:userId', async (req: Request, res: Response) => {
+  const searchedId = req.params.userId
+  const { userId } = res.locals.context
+
+  const user = await service.getProfile(searchedId)
+
+  return res.status(HttpStatus.OK).json(user)
+})
+
 /**
  * @swagger
  *
@@ -467,7 +500,7 @@ userRouter.get('/:userId', async (req: Request, res: Response) => {
  *     summary: Get user recommendations paginated
  *     tags: [User]
  *     parameters:
- *       - in: path
+ *       - in: query
  *         name: username
  *         schema:
  *           type: string
@@ -491,10 +524,9 @@ userRouter.get('/:userId', async (req: Request, res: Response) => {
  *
  */
 
-userRouter.get('/by_username/:username', async (req: Request, res: Response) => {
-  const username = req.params.username
+userRouter.get('/by_username/search', async (req: Request, res: Response) => {
 
-  const { limit, skip } = req.query as Record<string, string>
+  const { username, limit, skip } = req.query as Record<string, string>
 
   const users = await service.getUsersByUsername(username, { limit: Number(limit), skip: Number(skip) })
 
@@ -512,22 +544,22 @@ userRouter.get('/by_username/:username', async (req: Request, res: Response) => 
  *       bearerFormat: JWT
  *
  *
- * /api/user/:
+ * /api/user/me:
  *   delete:
  *     security:
  *       - bearerAuth: []
  *     summary: Delete your profile
  *     tags: [User]
  *     responses:
- *       200:
+ *       204:
  *         description: User deleted successfully
  *
  */
 
-userRouter.delete('/', async (req: Request, res: Response) => {
+userRouter.delete('/me', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
   await service.deleteUser(userId)
 
-  return res.status(HttpStatus.OK)
+  return res.status(HttpStatus.NO_CONTENT).send()
 })

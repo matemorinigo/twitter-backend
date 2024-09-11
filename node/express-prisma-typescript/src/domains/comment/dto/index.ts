@@ -7,7 +7,6 @@ export class CreateCommentInputDTO {
     content!: string
 
   @IsOptional()
-  @MaxLength(4)
     images?: string[]
 }
 

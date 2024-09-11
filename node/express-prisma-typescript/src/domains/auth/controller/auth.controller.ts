@@ -110,7 +110,7 @@ const service: AuthService = new AuthServiceImpl(new UserRepositoryImpl(db))
 
 authRouter.post('/signup', BodyValidation(SignupInputDTO), async (req: Request, res: Response) => {
   const data = req.body
-  
+
   const token = await service.signup(data)
 
   return res.status(HttpStatus.CREATED).json(token)
@@ -195,6 +195,76 @@ authRouter.post('/login', BodyValidation(LoginInputDTO), async (req: Request, re
   return res.status(HttpStatus.OK).json(token)
 })
 
-authRouter.get('/validate_token', withAuth, async (req: Request, res: Response) => {
-  return res.status(HttpStatus.OK)
+
+/**
+ * @swagger
+ *
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *   schemas:
+ *     LoginInputDTO:
+ *       type: object
+ *       properties:
+ *         email:
+ *           type: string
+ *           format: email
+ *         username:
+ *           type: string
+ *         password:
+ *           type: string
+ *           format: password
+ *       required:
+ *         - password
+ *       oneOf:
+ *         - required: [email]
+ *         - required: [username]
+ *     token:
+ *       type: object
+ *       properties:
+ *         token:
+ *           type: string
+ *     validationError:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         code:
+ *           type: number
+ *           default: 400
+ *         errors:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               property:
+ *                 type: string
+ *               children:
+ *                 type: array
+ *               constraints:
+ *                 type: object
+ *
+ * /api/auth/validate_token:
+ *   get:
+ *     summary: Login a user
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User logged in successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/token'
+ */
+
+authRouter.get('/validate_token',async (req: Request, res: Response) => {
+  const token = req.headers.authorization?.split(' ')[1]
+  if(!token) return res.status(HttpStatus.UNAUTHORIZED).send()
+  if(await service.validateToken(token)) return res.status(HttpStatus.OK).send()
+  return res.status(HttpStatus.UNAUTHORIZED).send()
 })

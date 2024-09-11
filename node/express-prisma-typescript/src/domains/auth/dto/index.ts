@@ -12,11 +12,11 @@ export class SignupInputDTO {
   @IsString()
   @IsNotEmpty()
   @IsEmail()
-    email: string
+    email!: string
 
   @IsString()
   @IsNotEmpty()
-    username: string
+    username!: string
 
   @IsString()
   @IsNotEmpty()

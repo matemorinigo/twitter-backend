@@ -1,5 +1,5 @@
 import { OffsetPagination } from '@types'
-import { UpdateUserDTO, UserViewDTO } from '../dto'
+import { UpdateUserDTO, UserProfileDTO, UserViewDTO } from '../dto'
 
 export interface UserService {
   deleteUser: (userId: string) => Promise<void>
@@ -9,4 +9,5 @@ export interface UserService {
   getUserRecommendations: (userId: any, options: OffsetPagination) => Promise<UserViewDTO[]>
   getProfilePicture: (userId: string) => Promise<string | null>
   uploadProfilePicture: (userId: string) => Promise<string>
+  getProfile: (userId: string) => Promise<UserProfileDTO>
 }

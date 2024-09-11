@@ -95,7 +95,7 @@ model Reaction {
 
   type ReactionType
 
-  post   Post   @relation(fields: [postId], references: [id]) // One post have many reactions
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade) // One post have many reactions
   User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @db.Uuid
 

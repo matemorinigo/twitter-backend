@@ -9,7 +9,7 @@ import { sendMessageHandler, errorMessageHandler } from '@domains/message/socket
 export const getSocket = (server: http.Server): Server => {
   const io = new Server(server, {
     cors: {
-      origin: [`localhost:${Constants.PORT}`, 'http://localhost:3000'],
+      origin: [`localhost:${Constants.PORT}`, 'http://localhost:3000', 'https://twitter-frontend-challenge-drab.vercel.app/'],
     },
   });
 

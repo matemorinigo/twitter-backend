@@ -12,13 +12,19 @@ export class UserRepositoryImpl implements UserRepository {
   constructor (private readonly db: PrismaClient) {}
 
   async create (data: SignupInputDTO): Promise<UserDTO> {
-    const name = uniqueNamesGenerator({
-      dictionaries: [colors, adjectives, starWars],
-      length: 2
-    })
-    return await this.db.user.create({
-      data: { ...data, name }
-    }).then(user => new UserDTO(user))
+    if(!data.name){
+      const name = uniqueNamesGenerator({
+        dictionaries: [colors, adjectives, starWars],
+        length: 2
+      })
+      return await this.db.user.create({
+        data: { ...data, name }
+      }).then(user => new UserDTO(user))
+    }else{
+      return await this.db.user.create({
+        data
+      }).then(user => new UserDTO(user))
+    }
   }
 
   async getById (userId: any): Promise<ExtendedUserDTO | null> {

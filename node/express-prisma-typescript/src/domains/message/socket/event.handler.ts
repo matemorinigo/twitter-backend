@@ -33,6 +33,7 @@ export const sendMessageHandler = (io: Server, socket: Socket) => {
       ) {
         await MessageService.send(userId, receiverId, data)
         socket.to(room).emit('message:receive', { user: userId, data })
+        socket.emit('message:sent')
       }
     }
   }

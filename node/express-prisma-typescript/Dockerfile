@@ -32,16 +32,3 @@ COPY --from=builder /app/dist ./dist
 EXPOSE 8080
 
 CMD yarn prod
-
-# Development runtime
-FROM node:18-alpine AS dev
-
-WORKDIR /app
-
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/package.json ./
-COPY nodemon.json ./nodemon.json
-COPY tsconfig.json ./tsconfig.json
-COPY . .
-
-CMD yarn dev

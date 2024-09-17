@@ -15,7 +15,7 @@
     "moduleResolution": "node",
     "incremental": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": false,
     "strictNullChecks": true,
     "noImplicitAny": true,
     "forceConsistentCasingInFileNames": true,
